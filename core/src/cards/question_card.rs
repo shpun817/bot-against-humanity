@@ -6,7 +6,7 @@ use crate::errors::GameCoreError;
 
 use super::answer_card::AnswerCard;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub(crate) struct QuestionCard {
     tokens: Vec<QuestionToken>,
 }
