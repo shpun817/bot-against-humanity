@@ -1,3 +1,4 @@
+#[derive(Clone, Debug)]
 pub(crate) struct AnswerCard {
     pub(crate) content: String,
 }

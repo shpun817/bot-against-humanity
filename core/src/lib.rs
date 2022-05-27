@@ -1,4 +1,5 @@
 mod cards;
+mod errors;
 
 use wasm_bindgen::prelude::*;
 

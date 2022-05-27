@@ -2,6 +2,11 @@ use std::fmt::Display;
 
 use regex::Regex;
 
+use crate::errors::GameCoreError;
+
+use super::answer_card::AnswerCard;
+
+#[derive(Clone, Debug)]
 pub(crate) struct QuestionCard {
     tokens: Vec<QuestionToken>,
 }
@@ -53,6 +58,36 @@ impl QuestionCard {
             }
         }
     }
+
+    pub(crate) fn num_blanks(&self) -> usize {
+        self.tokens.iter().filter(|token| token.is_none()).count()
+    }
+
+    pub(crate) fn combine_with_answer_cards(
+        &self,
+        answer_cards: &[AnswerCard],
+    ) -> Result<String, GameCoreError> {
+        if self.num_blanks() != answer_cards.len() {
+            return Err(GameCoreError::QuestionBlanksAndNumAnswersMismatch);
+        }
+
+        let mut current_answer = 0;
+
+        Ok(self
+            .tokens
+            .iter()
+            .map(|token| {
+                let token_str = if let Some(token_str) = token {
+                    token_str
+                } else {
+                    let answer_str = &answer_cards[current_answer].content;
+                    current_answer += 1;
+                    answer_str
+                };
+                token_str.to_owned()
+            })
+            .collect::<String>())
+    }
 }
 
 #[cfg(test)]
@@ -67,6 +102,8 @@ mod tests {
 
         assert_eq!(question_card.tokens[0].as_ref().unwrap(), "How are you? ");
         assert!(question_card.tokens[1].is_none());
+
+        assert_eq!(question_card.num_blanks(), 1);
     }
 
     #[test]
@@ -77,6 +114,8 @@ mod tests {
 
         assert_eq!(question_card.tokens[0].as_ref().unwrap(), "How are you? ");
         assert!(question_card.tokens[1].is_none());
+
+        assert_eq!(question_card.num_blanks(), 1);
     }
 
     #[test]
@@ -90,6 +129,8 @@ mod tests {
         assert!(question_card.tokens[1].is_none());
 
         assert_eq!(question_card.tokens[2].as_ref().unwrap(), "?");
+
+        assert_eq!(question_card.num_blanks(), 1);
     }
 
     #[test]
@@ -103,6 +144,8 @@ mod tests {
         assert!(question_card.tokens[1].is_none());
 
         assert_eq!(question_card.tokens[2].as_ref().unwrap(), "?");
+
+        assert_eq!(question_card.num_blanks(), 1);
     }
 
     #[test]
@@ -116,6 +159,8 @@ mod tests {
         assert!(question_card.tokens[1].is_none());
 
         assert_eq!(question_card.tokens[2].as_ref().unwrap(), "?");
+
+        assert_eq!(question_card.num_blanks(), 1);
     }
 
     #[test]
@@ -133,6 +178,8 @@ mod tests {
         assert!(question_card.tokens[3].is_none());
 
         assert_eq!(question_card.tokens[4].as_ref().unwrap(), "?");
+
+        assert_eq!(question_card.num_blanks(), 2);
     }
 
     #[test]
@@ -145,5 +192,54 @@ mod tests {
     fn display_question_with_blanks() {
         let question_card = QuestionCard::new("Who are _, _?");
         assert_eq!(question_card.to_string(), "Who are _, _?");
+    }
+
+    #[test]
+    fn combine_with_answer_cards_question() {
+        let question_card = QuestionCard::new("Who am I?");
+        let answer_cards = vec![AnswerCard::new("Your Father")];
+
+        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        assert_eq!(combine_result.ok().unwrap(), "Who am I? Your Father");
+    }
+
+    #[test]
+    fn combine_with_answer_cards_fill_single_blank() {
+        let question_card = QuestionCard::new("I am _.");
+        let answer_cards = vec![AnswerCard::new("Your Father")];
+
+        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        assert_eq!(combine_result.ok().unwrap(), "I am Your Father.");
+    }
+
+    #[test]
+    fn combine_with_answer_cards_fill_multiple_blanks() {
+        let question_card = QuestionCard::new("I am _, and you are _.");
+        let answer_cards = vec![
+            AnswerCard::new("Your Father"),
+            AnswerCard::new("Luke Skywalker"),
+        ];
+
+        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        assert_eq!(
+            combine_result.ok().unwrap(),
+            "I am Your Father, and you are Luke Skywalker."
+        );
+    }
+
+    #[test]
+    fn combine_with_wrong_number_of_answer_cards() {
+        let question_card = QuestionCard::new("I am _, and you are _.");
+        let answer_cards = vec![
+            AnswerCard::new("Your Father"),
+            AnswerCard::new("My Mother"),
+            AnswerCard::new("Luke Skywalker"),
+        ];
+
+        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        assert_eq!(
+            combine_result.err().unwrap(),
+            GameCoreError::QuestionBlanksAndNumAnswersMismatch
+        );
     }
 }
