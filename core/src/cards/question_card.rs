@@ -4,7 +4,7 @@ use regex::Regex;
 
 use crate::errors::GameCoreError;
 
-use super::answer_card::AnswerCard;
+use super::{answer_card::AnswerCard, card::Card};
 
 #[derive(Debug)]
 pub(crate) struct QuestionCard {
@@ -12,6 +12,8 @@ pub(crate) struct QuestionCard {
 }
 
 pub(crate) type QuestionToken = Option<String>;
+
+impl Card for QuestionCard {}
 
 impl Display for QuestionCard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -92,6 +94,8 @@ impl QuestionCard {
 
 #[cfg(test)]
 mod tests {
+    use crate::cards::card_storage::CardStorage;
+
     use super::*;
 
     #[test]
@@ -241,5 +245,12 @@ mod tests {
             combine_result.err().unwrap(),
             GameCoreError::QuestionBlanksAndNumAnswersMismatch
         );
+    }
+
+    #[test]
+    fn card_storage() {
+        let mut card_storage = CardStorage::new();
+        let question_card = QuestionCard::new("Who am I?");
+        card_storage.add_card_to_deck(question_card);
     }
 }
