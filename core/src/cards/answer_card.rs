@@ -1,6 +1,6 @@
 use super::card::Card;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct AnswerCard {
     pub(crate) content: String,
 }
