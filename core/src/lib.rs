@@ -1,5 +1,6 @@
 mod cards;
 mod errors;
+mod game_state;
 mod player;
 
 use wasm_bindgen::prelude::*;

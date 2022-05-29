@@ -2,6 +2,7 @@ use rand::{prelude::SliceRandom, thread_rng};
 
 use super::card::Card;
 
+#[derive(Clone, Debug)]
 pub(crate) struct CardStorage<C>
 where
     C: Card,

@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::{cards::AnswerCard, errors::GameCoreError};
 
+#[derive(Clone, Debug)]
 pub(crate) struct Player {
     awesome_points: i32,
     hand: Vec<AnswerCard>,

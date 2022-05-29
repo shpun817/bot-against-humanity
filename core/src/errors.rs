@@ -16,6 +16,15 @@ pub enum GameCoreError {
     PlayerWithThisNameAlreadyExists {
         name: String,
     },
+    InsufficientAnswerCardsToDeal {
+        num_players: usize,
+        each_deal: usize,
+        num_answer_cards: usize,
+    },
+    NotEnoughPlayers {
+        num_players: usize,
+    },
+    NoQuestionCards,
 }
 
 impl Display for GameCoreError {
@@ -48,6 +57,20 @@ impl Display for GameCoreError {
             GameCoreError::PlayerWithThisNameAlreadyExists { name } => {
                 format!("A Player with the name {} already exists.", name)
             }
+            GameCoreError::InsufficientAnswerCardsToDeal {
+                num_players,
+                each_deal,
+                num_answer_cards,
+            } => {
+                format!(
+                    "Cannot deal {} cards to {} players when there are only {} cards in total.",
+                    each_deal, num_players, num_answer_cards
+                )
+            }
+            GameCoreError::NotEnoughPlayers { num_players } => {
+                format!("There must be at least 3 players. (Now: {})", num_players)
+            }
+            GameCoreError::NoQuestionCards => "There are no question cards.".to_owned(),
         };
 
         write!(f, "GameCoreError: {}", msg)
