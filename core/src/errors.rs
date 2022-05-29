@@ -13,18 +13,21 @@ pub enum GameCoreError {
     PlayerChoosingTheSameCardMultipleTimes {
         chosen_ind: usize,
     },
-    PlayerWithThisNameAlreadyExists {
-        name: String,
-    },
     InsufficientAnswerCardsToDeal {
         num_players: usize,
         each_deal: usize,
         num_answer_cards: usize,
     },
+    NoQuestionCards,
     NotEnoughPlayers {
         num_players: usize,
     },
-    NoQuestionCards,
+    PlayerAlreadyExists {
+        name: String,
+    },
+    PlayerDoesNotExist {
+        name: String,
+    },
 }
 
 impl Display for GameCoreError {
@@ -54,7 +57,7 @@ impl Display for GameCoreError {
                     chosen_ind
                 )
             }
-            GameCoreError::PlayerWithThisNameAlreadyExists { name } => {
+            GameCoreError::PlayerAlreadyExists { name } => {
                 format!("A Player with the name {} already exists.", name)
             }
             GameCoreError::InsufficientAnswerCardsToDeal {
@@ -71,6 +74,9 @@ impl Display for GameCoreError {
                 format!("There must be at least 3 players. (Now: {})", num_players)
             }
             GameCoreError::NoQuestionCards => "There are no question cards.".to_owned(),
+            GameCoreError::PlayerDoesNotExist { name } => {
+                format!("Player with name {} does not exist.", name)
+            }
         };
 
         write!(f, "GameCoreError: {}", msg)

@@ -59,13 +59,32 @@ where
         let player_name = player_name.into();
 
         if self.players.contains_key(&player_name) {
-            Err(GameCoreError::PlayerWithThisNameAlreadyExists {
+            Err(GameCoreError::PlayerAlreadyExists {
                 name: player_name.to_string(),
             })
         } else {
             self.players.insert(player_name, Player::new());
             Ok(())
         }
+    }
+
+    pub(crate) fn withdraw_player(
+        &mut self,
+        player_name: impl Into<PN>,
+    ) -> Result<(), GameCoreError> {
+        let player_name = player_name.into();
+
+        if self.players.remove(&player_name).is_none() {
+            Err(GameCoreError::PlayerDoesNotExist {
+                name: player_name.to_string(),
+            })
+        } else {
+            Ok(())
+        }
+    }
+
+    pub(crate) fn withdraw_all_players(&mut self) {
+        self.players = HashMap::new();
     }
 
     pub(crate) fn add_new_question(&mut self, question: impl Into<String>) {
@@ -144,13 +163,48 @@ mod tests {
     }
 
     #[test]
+    fn withdraw_player() {
+        let mut game_state_builder: GameStateBuilder = GameStateBuilder::new();
+        game_state_builder.add_new_player("A").ok().unwrap();
+
+        assert!(game_state_builder.withdraw_player("A").is_ok());
+        assert_eq!(game_state_builder.num_players(), 0);
+    }
+
+    #[test]
+    fn withdraw_player_not_exist() {
+        let mut game_state_builder: GameStateBuilder = GameStateBuilder::new();
+        game_state_builder.add_new_player("A").ok().unwrap();
+
+        assert_eq!(
+            game_state_builder.withdraw_player("B").err().unwrap(),
+            GameCoreError::PlayerDoesNotExist {
+                name: "B".to_owned()
+            }
+        );
+        assert_eq!(game_state_builder.num_players(), 1);
+    }
+
+    #[test]
+    fn withdraw_all_players() {
+        let mut game_state_builder: GameStateBuilder = GameStateBuilder::new();
+        game_state_builder.add_new_player("A").ok().unwrap();
+        game_state_builder.add_new_player("B").ok().unwrap();
+        game_state_builder.add_new_player("C").ok().unwrap();
+
+        game_state_builder.withdraw_all_players();
+
+        assert_eq!(game_state_builder.num_players(), 0);
+    }
+
+    #[test]
     fn add_player_already_exists() {
         let mut game_state_builder: GameStateBuilder = GameStateBuilder::new();
         game_state_builder.add_new_player("A").ok().unwrap();
 
         assert_eq!(
             game_state_builder.add_new_player("A").err().unwrap(),
-            GameCoreError::PlayerWithThisNameAlreadyExists {
+            GameCoreError::PlayerAlreadyExists {
                 name: "A".to_owned()
             }
         );
