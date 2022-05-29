@@ -2,22 +2,51 @@ use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum GameCoreError {
-    QuestionBlanksAndNumAnswersMismatch,
-    PlayerChoosingPlayCardOutOfHandBounds,
-    PlayerChoosingTheSameCardMultipleTimes,
+    QuestionBlanksAndNumAnswersMismatch {
+        num_blanks: usize,
+        num_answers: usize,
+    },
+    PlayerChoosingCardOutOfHandBound {
+        chosen_ind: usize,
+        hand_bound: usize,
+    },
+    PlayerChoosingTheSameCardMultipleTimes {
+        chosen_ind: usize,
+    },
+    PlayerWithThisNameAlreadyExists {
+        name: String,
+    },
 }
 
 impl Display for GameCoreError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let msg = match self {
-            GameCoreError::QuestionBlanksAndNumAnswersMismatch => {
-                "Mismatch in number of question blanks and number of answers."
+            GameCoreError::QuestionBlanksAndNumAnswersMismatch {
+                num_blanks,
+                num_answers,
+            } => {
+                format!(
+                    "Mismatch in number of question blanks ({}) and number of answers ({}).",
+                    num_blanks, num_answers
+                )
             }
-            GameCoreError::PlayerChoosingPlayCardOutOfHandBounds => {
-                "Player chose a card index out of hand bounds."
+            GameCoreError::PlayerChoosingCardOutOfHandBound {
+                chosen_ind,
+                hand_bound,
+            } => {
+                format!(
+                    "Player chose a card index ({}) >= hand size ({}).",
+                    chosen_ind, hand_bound
+                )
             }
-            GameCoreError::PlayerChoosingTheSameCardMultipleTimes => {
-                "Player chose the same card index multiple times."
+            GameCoreError::PlayerChoosingTheSameCardMultipleTimes { chosen_ind } => {
+                format!(
+                    "Player chose the same card index ({}) multiple times.",
+                    chosen_ind
+                )
+            }
+            GameCoreError::PlayerWithThisNameAlreadyExists { name } => {
+                format!("A Player with the name {} already exists.", name)
             }
         };
 

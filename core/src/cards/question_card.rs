@@ -70,7 +70,10 @@ impl QuestionCard {
         answer_cards: &[AnswerCard],
     ) -> Result<String, GameCoreError> {
         if self.num_blanks() != answer_cards.len() {
-            return Err(GameCoreError::QuestionBlanksAndNumAnswersMismatch);
+            return Err(GameCoreError::QuestionBlanksAndNumAnswersMismatch {
+                num_blanks: self.num_blanks(),
+                num_answers: answer_cards.len(),
+            });
         }
 
         let mut current_answer = 0;
@@ -243,7 +246,10 @@ mod tests {
         let combine_result = question_card.combine_with_answer_cards(&answer_cards);
         assert_eq!(
             combine_result.err().unwrap(),
-            GameCoreError::QuestionBlanksAndNumAnswersMismatch
+            GameCoreError::QuestionBlanksAndNumAnswersMismatch {
+                num_blanks: 2,
+                num_answers: 3
+            }
         );
     }
 

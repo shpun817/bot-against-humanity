@@ -39,10 +39,15 @@ impl Player {
         let mut ind_set = HashSet::new();
         for &ind in indices.iter() {
             if ind >= self.hand.len() {
-                return Err(GameCoreError::PlayerChoosingPlayCardOutOfHandBounds);
+                return Err(GameCoreError::PlayerChoosingCardOutOfHandBound {
+                    chosen_ind: ind,
+                    hand_bound: self.hand.len(),
+                });
             }
             if ind_set.contains(&ind) {
-                return Err(GameCoreError::PlayerChoosingTheSameCardMultipleTimes);
+                return Err(GameCoreError::PlayerChoosingTheSameCardMultipleTimes {
+                    chosen_ind: ind,
+                });
             }
             ind_set.insert(ind);
         }
@@ -126,7 +131,10 @@ mod tests {
 
         assert_eq!(
             play_cards_result.err().unwrap(),
-            GameCoreError::PlayerChoosingPlayCardOutOfHandBounds
+            GameCoreError::PlayerChoosingCardOutOfHandBound {
+                chosen_ind: 10,
+                hand_bound: 10
+            }
         );
 
         assert_eq!(
@@ -148,7 +156,7 @@ mod tests {
 
         assert_eq!(
             play_cards_result.err().unwrap(),
-            GameCoreError::PlayerChoosingTheSameCardMultipleTimes
+            GameCoreError::PlayerChoosingTheSameCardMultipleTimes { chosen_ind: 0 }
         );
 
         assert_eq!(
