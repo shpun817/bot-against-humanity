@@ -8,7 +8,7 @@ use crate::{
 
 use super::GameState;
 
-pub(crate) struct GameStateBuilder<PN = String>
+pub struct GameStateBuilder<PN = String>
 where
     PN: PlayerName,
 {
@@ -17,14 +17,14 @@ where
     answer_card_storage: CardStorage<AnswerCard>,
 }
 
-pub(crate) trait PlayerName: Clone + Display + Eq + Hash {}
+pub trait PlayerName: Clone + Display + Eq + Hash {}
 impl PlayerName for String {}
 
 impl<PN> GameStateBuilder<PN>
 where
     PN: PlayerName,
 {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             players: HashMap::new(),
             question_card_storage: CardStorage::new(),
@@ -32,20 +32,20 @@ where
         }
     }
 
-    pub(crate) fn num_players(&self) -> usize {
+    pub fn num_players(&self) -> usize {
         self.players.len()
     }
 
-    pub(crate) fn num_question_cards_in_storage(&self) -> usize {
+    pub fn num_question_cards_in_storage(&self) -> usize {
         self.question_card_storage.num_cards_total()
     }
 
-    pub(crate) fn num_answer_cards_in_storage(&self) -> usize {
+    pub fn num_answer_cards_in_storage(&self) -> usize {
         self.answer_card_storage.num_cards_total()
     }
 
     #[allow(clippy::map_entry)]
-    pub(crate) fn add_new_player(
+    pub fn add_new_player(
         &mut self,
         player_name: impl Into<PN>,
     ) -> Result<(), GameCoreError> {
@@ -61,7 +61,7 @@ where
         }
     }
 
-    pub(crate) fn withdraw_player(
+    pub fn withdraw_player(
         &mut self,
         player_name: impl Into<PN>,
     ) -> Result<(), GameCoreError> {
@@ -76,21 +76,21 @@ where
         }
     }
 
-    pub(crate) fn withdraw_all_players(&mut self) {
+    pub fn withdraw_all_players(&mut self) {
         self.players = HashMap::new();
     }
 
-    pub(crate) fn add_new_question(&mut self, question: impl Into<String>) {
+    pub fn add_new_question(&mut self, question: impl Into<String>) {
         self.question_card_storage
             .add_card_to_deck(QuestionCard::new(question));
     }
 
-    pub(crate) fn add_new_answer(&mut self, answer: impl Into<String>) {
+    pub fn add_new_answer(&mut self, answer: impl Into<String>) {
         self.answer_card_storage
             .add_card_to_deck(AnswerCard::new(answer));
     }
 
-    pub(crate) fn build(
+    pub fn build(
         &mut self,
         num_cards_per_player: usize,
     ) -> Result<GameState<PN>, GameCoreError> {
