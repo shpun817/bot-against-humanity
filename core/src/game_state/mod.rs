@@ -8,10 +8,10 @@ use crate::{
     player::Player,
 };
 
+pub mod builder;
+
 pub trait PlayerName: Clone + Display + Eq + Hash + PartialEq {}
 impl PlayerName for String {}
-
-pub mod builder;
 
 pub struct GameState<PN = String>
 where
