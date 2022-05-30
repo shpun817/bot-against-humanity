@@ -16,6 +16,10 @@ impl Player {
         }
     }
 
+    pub(crate) fn awesome_points(&self) -> i32 {
+        self.awesome_points
+    }
+
     /// The value after increment is returned.
     pub(crate) fn increment_awesome_points(&mut self) -> i32 {
         self.awesome_points += 1;
@@ -28,6 +32,10 @@ impl Player {
 
     pub(crate) fn add_card_to_hand(&mut self, card: AnswerCard) {
         self.hand.push(card);
+    }
+
+    pub(crate) fn report_hand(&self) -> Vec<String> {
+        self.hand.iter().map(|card| card.content.clone()).collect()
     }
 
     /// `indices` are ZERO-based indices of the hand.
@@ -162,5 +170,19 @@ mod tests {
             10,
             "Player's cards are played even though there's an error."
         );
+    }
+
+    #[test]
+    fn report_hand() {
+        let mut player = Player::new();
+        for i in 0..10 {
+            player.add_card_to_hand(AnswerCard::new(i.to_string()));
+        }
+
+        let hand = player.report_hand();
+
+        for i in 0..10 {
+            assert_eq!(hand[i], i.to_string());
+        }
     }
 }

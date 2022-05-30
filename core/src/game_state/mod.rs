@@ -64,6 +64,15 @@ where
         self.current_question.as_ref().unwrap().to_string()
     }
 
+    /// The vectors in the returned values must be in the same order as the players' hands.
+    /// The order of the entries, however, is arbitrary.
+    pub fn report_hands(&self) -> HashMap<PN, Vec<String>> {
+        self.players
+            .iter()
+            .map(|(player_name, player)| (player_name.clone(), player.report_hand()))
+            .collect()
+    }
+
     pub fn submit_answers(
         &mut self,
         player_name: &PN,
@@ -120,6 +129,19 @@ where
                 name: player_name.to_string(),
             })
         }
+    }
+
+    /// In descending order of awesome points.
+    pub fn report_awesome_point_ranking(&self) -> Vec<(PN, i32)> {
+        let mut ranking: Vec<(PN, i32)> = self
+            .players
+            .iter()
+            .map(|(player_name, player)| (player_name.clone(), player.awesome_points()))
+            .collect();
+
+        ranking.sort_by_key(|(_, ap)| -(*ap));
+
+        ranking
     }
 
     /// Requirements:
@@ -233,6 +255,18 @@ mod tests {
         let current_question = game_state.draw_next_question_card();
 
         assert!(current_question.starts_with('Q'));
+    }
+
+    #[test]
+    fn report_hands() {
+        let game_state = get_built_game_state();
+
+        let hands = game_state.report_hands();
+
+        assert_eq!(hands.len(), game_state.num_players);
+        for hand in hands.values() {
+            assert_eq!(hand.len(), game_state.max_hand_size);
+        }
     }
 
     #[test]
@@ -427,5 +461,21 @@ mod tests {
                 name: "D".to_owned()
             })
         )
+    }
+
+    #[test]
+    fn report_awesome_point_ranking() {
+        let mut game_state = get_built_game_state();
+        game_state
+            .increment_awesome_points(&"A".to_owned())
+            .ok()
+            .unwrap();
+
+        let awesome_point_ranking = game_state.report_awesome_point_ranking();
+
+        assert_eq!(awesome_point_ranking.len(), game_state.num_players);
+        assert_eq!(awesome_point_ranking[0], ("A".to_owned(), 1));
+        assert_eq!(awesome_point_ranking[1].1, 0);
+        assert_eq!(awesome_point_ranking[2].1, 0);
     }
 }
