@@ -8,6 +8,8 @@ use crate::{
     player::Player,
 };
 
+pub type AllSubmittedAnswers<PlayerName> = Option<Vec<(PlayerName, String)>>;
+
 pub mod builder;
 
 pub use builder::*;
@@ -32,10 +34,8 @@ where
     // Variables
     current_judge: usize,
     current_question: Option<QuestionCard>,
-    submitted_answers_display: SubmittedCombinedAnswersDisplay<PN>,
+    submitted_answers_display: HashMap<PN, String>,
 }
-
-pub type SubmittedCombinedAnswersDisplay<PN> = HashMap<PN, String>;
 
 impl<PN> GameState<PN>
 where
@@ -79,7 +79,7 @@ where
         &mut self,
         player_name: &PN,
         indices: &[usize],
-    ) -> Result<Option<SubmittedCombinedAnswersDisplay<PN>>, GameCoreError> {
+    ) -> Result<AllSubmittedAnswers<PN>, GameCoreError> {
         let question = if let Some(q) = self.current_question.as_ref() {
             q
         } else {
@@ -112,7 +112,14 @@ where
             if self.submitted_answers_display.len() == self.num_players - 1 {
                 self.refill_player_hands();
 
-                return Ok(Some(std::mem::take(&mut self.submitted_answers_display)));
+                let mut submitted_answers: Vec<(PN, String)> =
+                    std::mem::take(&mut self.submitted_answers_display)
+                        .into_iter()
+                        .collect();
+
+                submitted_answers.shuffle(&mut rand::thread_rng());
+
+                return Ok(Some(submitted_answers));
             }
         } else {
             return Err(GameCoreError::PlayerDoesNotExist {

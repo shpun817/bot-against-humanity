@@ -1,7 +1,8 @@
-mod cards;
 pub mod drivers;
-mod errors;
 pub mod game_state;
+
+mod cards;
+mod errors;
 mod player;
 
 use wasm_bindgen::prelude::*;
