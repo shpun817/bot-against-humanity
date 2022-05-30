@@ -82,6 +82,7 @@ impl Player {
 }
 
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]
@@ -181,8 +182,8 @@ mod tests {
 
         let hand = player.report_hand();
 
-        for i in 0..10 {
-            assert_eq!(hand[i], i.to_string());
+        for (i, card_content) in hand.into_iter().enumerate() {
+            assert_eq!(card_content, i.to_string());
         }
     }
 }

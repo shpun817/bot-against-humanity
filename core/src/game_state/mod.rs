@@ -10,6 +10,8 @@ use crate::{
 
 pub mod builder;
 
+pub use builder::*;
+
 pub trait PlayerName: Clone + Display + Eq + Hash + PartialEq {}
 impl PlayerName for String {}
 

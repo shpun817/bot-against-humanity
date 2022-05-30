@@ -68,6 +68,7 @@ mod tests {
 
     #[derive(Default)]
     struct DummyCard {
+        #[allow(dead_code)]
         id: usize,
     }
     impl Card for DummyCard {}

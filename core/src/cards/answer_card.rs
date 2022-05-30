@@ -16,8 +16,10 @@ impl AnswerCard {
 }
 
 mod tests {
+    #[allow(unused_imports)]
     use crate::cards::card_storage::CardStorage;
 
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]
