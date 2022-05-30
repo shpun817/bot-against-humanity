@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, hash::Hash};
+use std::collections::HashMap;
 
 use crate::{
     cards::{AnswerCard, CardStorage, QuestionCard},
@@ -6,7 +6,7 @@ use crate::{
     player::Player,
 };
 
-use super::GameState;
+use super::{GameState, PlayerName};
 
 pub struct GameStateBuilder<PN = String>
 where
@@ -16,9 +16,6 @@ where
     question_card_storage: CardStorage<QuestionCard>,
     answer_card_storage: CardStorage<AnswerCard>,
 }
-
-pub trait PlayerName: Clone + Display + Eq + Hash {}
-impl PlayerName for String {}
 
 impl<PN> GameStateBuilder<PN>
 where
@@ -124,11 +121,11 @@ where
             }
         }
 
-        Ok(GameState {
+        Ok(GameState::new(
             players,
             question_card_storage,
             answer_card_storage,
-        })
+        ))
     }
 }
 

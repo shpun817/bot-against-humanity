@@ -16,12 +16,10 @@ impl Player {
         }
     }
 
-    pub(crate) fn awesome_points(&self) -> i32 {
-        self.awesome_points
-    }
-
-    pub(crate) fn increment_awesome_points(&mut self) {
+    /// The value after increment is returned.
+    pub(crate) fn increment_awesome_points(&mut self) -> i32 {
         self.awesome_points += 1;
+        self.awesome_points
     }
 
     pub(crate) fn hand_size(&self) -> usize {
@@ -82,16 +80,15 @@ mod tests {
     fn new() {
         let player = Player::new();
 
-        assert_eq!(player.awesome_points(), 0);
         assert_eq!(player.hand_size(), 0);
     }
 
     #[test]
     fn increment_awesome_points() {
         let mut player = Player::new();
-        player.increment_awesome_points();
 
-        assert_eq!(player.awesome_points(), 1);
+        assert_eq!(player.increment_awesome_points(), 1);
+        assert_eq!(player.increment_awesome_points(), 2);
     }
 
     #[test]
