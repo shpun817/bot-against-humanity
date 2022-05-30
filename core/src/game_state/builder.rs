@@ -132,6 +132,15 @@ where
     }
 }
 
+impl<PN> Default for GameStateBuilder<PN>
+where
+    PN: PlayerName,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 mod tests {
     use super::*;
 
