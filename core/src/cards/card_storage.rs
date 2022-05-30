@@ -34,14 +34,26 @@ where
         self.discard_pile.push(card);
     }
 
+    /// If deck is empty, `refill_deck_and_shuffle()` is called first.
+    /// If both the deck and the discard pile are empty, None is returned.
     pub(crate) fn draw_card_from_deck(&mut self) -> Option<C> {
-        self.deck.pop()
+        if self.deck.is_empty() && self.discard_pile.is_empty() {
+            return None;
+        }
+
+        Some(if let Some(card) = self.deck.pop() {
+            card
+        } else {
+            self.refill_deck_and_shuffle();
+            self.deck.pop().unwrap()
+        })
     }
 
     pub(crate) fn shuffle_deck(&mut self) {
         self.deck.shuffle(&mut thread_rng());
     }
 
+    /// Move all cards from the discard pile to the deck and shuffle the deck.
     pub(crate) fn refill_deck_and_shuffle(&mut self) {
         while !self.discard_pile.is_empty() {
             let card = self.discard_pile.pop().unwrap();
@@ -102,11 +114,21 @@ mod tests {
     }
 
     #[test]
-    fn draw_a_card_when_deck_is_empty() {
+    fn draw_a_card_when_deck_and_discard_pile_are_empty() {
         let mut card_storage = CardStorage::<DummyCard>::new();
 
         let draw_result = card_storage.draw_card_from_deck();
         assert!(draw_result.is_none());
+    }
+
+    #[test]
+    fn draw_a_card_when_only_deck_is_empty() {
+        let mut card_storage = CardStorage::new();
+        card_storage.discard_card(DummyCard { id: 0 });
+        card_storage.discard_card(DummyCard { id: 1 });
+
+        let draw_card_result = card_storage.draw_card_from_deck();
+        assert!(draw_card_result.is_some());
     }
 
     #[test]
@@ -133,13 +155,10 @@ mod tests {
     #[test]
     fn refill_deck() {
         let mut card_storage = CardStorage::new();
-        (0..=1000).for_each(|id| {
+        (0..=50).for_each(|id| {
             let card = DummyCard { id };
             card_storage.discard_card(card);
         });
-
-        let drawn_card = card_storage.draw_card_from_deck();
-        assert!(drawn_card.is_none());
 
         card_storage.refill_deck_and_shuffle();
 
