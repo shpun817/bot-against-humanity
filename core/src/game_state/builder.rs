@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::{HashMap, HashSet},
+    iter::FromIterator,
+};
 
 use crate::{
     cards::{AnswerCard, CardStorage, QuestionCard},
@@ -12,7 +15,7 @@ pub struct GameStateBuilder<PN = String>
 where
     PN: PlayerName,
 {
-    players: HashMap<PN, Player>,
+    players: HashSet<PN>,
     question_card_storage: CardStorage<QuestionCard>,
     answer_card_storage: CardStorage<AnswerCard>,
 }
@@ -23,7 +26,7 @@ where
 {
     pub fn new() -> Self {
         Self {
-            players: HashMap::new(),
+            players: HashSet::new(),
             question_card_storage: CardStorage::new(),
             answer_card_storage: CardStorage::new(),
         }
@@ -45,12 +48,12 @@ where
     pub fn add_new_player(&mut self, player_name: impl Into<PN>) -> Result<(), GameCoreError> {
         let player_name = player_name.into();
 
-        if self.players.contains_key(&player_name) {
+        if self.players.contains(&player_name) {
             Err(GameCoreError::PlayerAlreadyExists {
                 name: player_name.to_string(),
             })
         } else {
-            self.players.insert(player_name, Player::new());
+            self.players.insert(player_name);
             Ok(())
         }
     }
@@ -58,7 +61,7 @@ where
     pub fn withdraw_player(&mut self, player_name: impl Into<PN>) -> Result<(), GameCoreError> {
         let player_name = player_name.into();
 
-        if self.players.remove(&player_name).is_none() {
+        if !self.players.remove(&player_name) {
             Err(GameCoreError::PlayerDoesNotExist {
                 name: player_name.to_string(),
             })
@@ -68,7 +71,7 @@ where
     }
 
     pub fn withdraw_all_players(&mut self) {
-        self.players = HashMap::new();
+        self.players = HashSet::new();
     }
 
     pub fn add_new_question(&mut self, question: impl Into<String>) {
@@ -108,7 +111,11 @@ where
             });
         }
 
-        let mut players = std::mem::take(&mut self.players);
+        let mut players = HashMap::from_iter(
+            std::mem::take(&mut self.players)
+                .into_iter()
+                .map(|player_name| (player_name, Player::new())),
+        );
         let mut question_card_storage = self.question_card_storage.clone();
         let mut answer_card_storage = self.answer_card_storage.clone();
 
