@@ -3,21 +3,18 @@ use std::{
     iter::FromIterator,
 };
 
-use crate::{
-    cards::{AnswerCard, CardStorage, QuestionCard},
-    errors::GameCoreError,
-    player::Player,
-};
+use crate::{cards::CardStorage, errors::GameCoreError, player::Player};
 
 use super::{GameState, PlayerName};
 
+#[derive(Default)]
 pub struct GameStateBuilder<PN = String>
 where
     PN: PlayerName,
 {
     players: HashSet<PN>,
-    question_card_storage: CardStorage<QuestionCard>,
-    answer_card_storage: CardStorage<AnswerCard>,
+    questions: HashSet<String>,
+    answers: HashSet<String>,
 }
 
 impl<PN> GameStateBuilder<PN>
@@ -25,23 +22,19 @@ where
     PN: PlayerName,
 {
     pub fn new() -> Self {
-        Self {
-            players: HashSet::new(),
-            question_card_storage: CardStorage::new(),
-            answer_card_storage: CardStorage::new(),
-        }
+        Default::default()
     }
 
     pub fn num_players(&self) -> usize {
         self.players.len()
     }
 
-    pub fn num_question_cards_in_storage(&self) -> usize {
-        self.question_card_storage.num_cards_total()
+    pub fn num_questions(&self) -> usize {
+        self.questions.len()
     }
 
     pub fn num_answer_cards_in_storage(&self) -> usize {
-        self.answer_card_storage.num_cards_total()
+        self.answers.len()
     }
 
     #[allow(clippy::map_entry)]
@@ -74,9 +67,16 @@ where
         self.players = HashSet::new();
     }
 
+    pub fn remove_all_questions(&mut self) {
+        self.questions = HashSet::new();
+    }
+
+    pub fn remove_all_answers(&mut self) {
+        self.answers = HashSet::new();
+    }
+
     pub fn add_new_question(&mut self, question: impl Into<String>) {
-        self.question_card_storage
-            .add_card_to_deck(QuestionCard::new(question));
+        self.questions.insert(question.into());
     }
 
     pub fn add_new_questions(&mut self, questions: impl IntoIterator<Item = impl Into<String>>) {
@@ -84,8 +84,7 @@ where
     }
 
     pub fn add_new_answer(&mut self, answer: impl Into<String>) {
-        self.answer_card_storage
-            .add_card_to_deck(AnswerCard::new(answer));
+        self.answers.insert(answer.into());
     }
 
     pub fn add_new_answers(&mut self, answers: impl IntoIterator<Item = impl Into<String>>) {
@@ -98,7 +97,7 @@ where
             return Err(GameCoreError::NotEnoughPlayers { num_players });
         }
 
-        if self.num_question_cards_in_storage() == 0 {
+        if self.num_questions() == 0 {
             return Err(GameCoreError::NoQuestionCards);
         }
 
@@ -116,8 +115,8 @@ where
                 .into_iter()
                 .map(|player_name| (player_name, Player::new())),
         );
-        let mut question_card_storage = self.question_card_storage.clone();
-        let mut answer_card_storage = self.answer_card_storage.clone();
+        let mut question_card_storage = CardStorage::from_cards(self.questions.clone());
+        let mut answer_card_storage = CardStorage::from_cards(self.answers.clone());
 
         answer_card_storage.shuffle_deck();
         question_card_storage.shuffle_deck();
@@ -136,15 +135,7 @@ where
     }
 }
 
-impl<PN> Default for GameStateBuilder<PN>
-where
-    PN: PlayerName,
-{
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
+#[cfg(test)]
 mod tests {
     #[allow(unused_imports)]
     use super::*;
@@ -154,7 +145,7 @@ mod tests {
         let game_state_builder: GameStateBuilder = GameStateBuilder::new();
 
         assert_eq!(game_state_builder.num_players(), 0);
-        assert_eq!(game_state_builder.num_question_cards_in_storage(), 0);
+        assert_eq!(game_state_builder.num_questions(), 0);
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 0);
     }
 
@@ -222,7 +213,7 @@ mod tests {
 
         game_state_builder.add_new_question("Where are you?");
 
-        assert_eq!(game_state_builder.num_question_cards_in_storage(), 1);
+        assert_eq!(game_state_builder.num_questions(), 1);
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 0);
     }
 
@@ -232,7 +223,7 @@ mod tests {
 
         game_state_builder.add_new_questions(["A?", "B?", "C?"]);
 
-        assert_eq!(game_state_builder.num_question_cards_in_storage(), 3);
+        assert_eq!(game_state_builder.num_questions(), 3);
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 0);
     }
 
@@ -242,7 +233,7 @@ mod tests {
 
         game_state_builder.add_new_answer("Paradise");
 
-        assert_eq!(game_state_builder.num_question_cards_in_storage(), 0);
+        assert_eq!(game_state_builder.num_questions(), 0);
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 1);
     }
 
@@ -252,7 +243,7 @@ mod tests {
 
         game_state_builder.add_new_answers(["A", "B", "C", "D"]);
 
-        assert_eq!(game_state_builder.num_question_cards_in_storage(), 0);
+        assert_eq!(game_state_builder.num_questions(), 0);
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 4);
     }
 
@@ -277,7 +268,7 @@ mod tests {
         assert_eq!(game_state.question_card_storage.num_cards_total(), 1);
 
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 30);
-        assert_eq!(game_state_builder.num_question_cards_in_storage(), 1);
+        assert_eq!(game_state_builder.num_questions(), 1);
         assert_eq!(
             game_state_builder.num_players(),
             0,

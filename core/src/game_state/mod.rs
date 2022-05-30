@@ -12,7 +12,7 @@ pub mod builder;
 
 pub use builder::*;
 
-pub trait PlayerName: Clone + Display + Eq + Hash + PartialEq {}
+pub trait PlayerName: Clone + Default + Display + Eq + Hash + PartialEq {}
 impl PlayerName for String {}
 
 pub struct GameState<PN = String>
@@ -189,6 +189,7 @@ where
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::{builder::GameStateBuilder, *};
 

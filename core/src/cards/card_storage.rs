@@ -22,6 +22,13 @@ where
         }
     }
 
+    pub(crate) fn from_cards(cards: impl IntoIterator<Item = impl Into<C>>) -> Self {
+        Self {
+            deck: cards.into_iter().map(|c| c.into()).collect(),
+            discard_pile: vec![],
+        }
+    }
+
     pub(crate) fn num_cards_total(&self) -> usize {
         self.deck.len() + self.discard_pile.len()
     }
@@ -63,6 +70,7 @@ where
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

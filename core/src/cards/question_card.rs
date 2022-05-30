@@ -35,6 +35,12 @@ impl Display for QuestionCard {
     }
 }
 
+impl From<String> for QuestionCard {
+    fn from(question: String) -> Self {
+        Self::new(question)
+    }
+}
+
 impl QuestionCard {
     pub(crate) fn new(question: impl Into<String>) -> Self {
         let underscores_regex = Regex::new("_+").unwrap();

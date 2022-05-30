@@ -7,6 +7,12 @@ pub(crate) struct AnswerCard {
 
 impl Card for AnswerCard {}
 
+impl From<String> for AnswerCard {
+    fn from(answer: String) -> Self {
+        Self::new(answer)
+    }
+}
+
 impl AnswerCard {
     pub(crate) fn new(content: impl Into<String>) -> Self {
         Self {
@@ -15,6 +21,7 @@ impl AnswerCard {
     }
 }
 
+#[cfg(test)]
 mod tests {
     #[allow(unused_imports)]
     use crate::cards::card_storage::CardStorage;
