@@ -45,10 +45,7 @@ where
     }
 
     #[allow(clippy::map_entry)]
-    pub fn add_new_player(
-        &mut self,
-        player_name: impl Into<PN>,
-    ) -> Result<(), GameCoreError> {
+    pub fn add_new_player(&mut self, player_name: impl Into<PN>) -> Result<(), GameCoreError> {
         let player_name = player_name.into();
 
         if self.players.contains_key(&player_name) {
@@ -61,10 +58,7 @@ where
         }
     }
 
-    pub fn withdraw_player(
-        &mut self,
-        player_name: impl Into<PN>,
-    ) -> Result<(), GameCoreError> {
+    pub fn withdraw_player(&mut self, player_name: impl Into<PN>) -> Result<(), GameCoreError> {
         let player_name = player_name.into();
 
         if self.players.remove(&player_name).is_none() {
@@ -85,15 +79,20 @@ where
             .add_card_to_deck(QuestionCard::new(question));
     }
 
+    pub fn add_new_questions(&mut self, questions: impl IntoIterator<Item = impl Into<String>>) {
+        questions.into_iter().for_each(|q| self.add_new_question(q));
+    }
+
     pub fn add_new_answer(&mut self, answer: impl Into<String>) {
         self.answer_card_storage
             .add_card_to_deck(AnswerCard::new(answer));
     }
 
-    pub fn build(
-        &mut self,
-        num_cards_per_player: usize,
-    ) -> Result<GameState<PN>, GameCoreError> {
+    pub fn add_new_answers(&mut self, answers: impl IntoIterator<Item = impl Into<String>>) {
+        answers.into_iter().for_each(|a| self.add_new_answer(a));
+    }
+
+    pub fn build(&mut self, num_cards_per_player: usize) -> Result<GameState<PN>, GameCoreError> {
         let num_players = self.players.len();
         if num_players < 3 {
             return Err(GameCoreError::NotEnoughPlayers { num_players });
@@ -112,7 +111,7 @@ where
             });
         }
 
-        let mut players = self.players.clone();
+        let mut players = std::mem::take(&mut self.players);
         let mut question_card_storage = self.question_card_storage.clone();
         let mut answer_card_storage = self.answer_card_storage.clone();
 
@@ -214,6 +213,16 @@ mod tests {
     }
 
     #[test]
+    fn add_questions_to_storage() {
+        let mut game_state_builder: GameStateBuilder = GameStateBuilder::new();
+
+        game_state_builder.add_new_questions(["A?", "B?", "C?"]);
+
+        assert_eq!(game_state_builder.num_question_cards_in_storage(), 3);
+        assert_eq!(game_state_builder.num_answer_cards_in_storage(), 0);
+    }
+
+    #[test]
     fn add_answer_to_storage() {
         let mut game_state_builder: GameStateBuilder = GameStateBuilder::new();
 
@@ -221,6 +230,16 @@ mod tests {
 
         assert_eq!(game_state_builder.num_question_cards_in_storage(), 0);
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 1);
+    }
+
+    #[test]
+    fn add_answers_to_storage() {
+        let mut game_state_builder: GameStateBuilder = GameStateBuilder::new();
+
+        game_state_builder.add_new_answers(["A", "B", "C", "D"]);
+
+        assert_eq!(game_state_builder.num_question_cards_in_storage(), 0);
+        assert_eq!(game_state_builder.num_answer_cards_in_storage(), 4);
     }
 
     #[test]
@@ -242,7 +261,14 @@ mod tests {
         assert_eq!(game_state.players.get("C").unwrap().hand_size(), 10);
         assert_eq!(game_state.answer_card_storage.num_cards_total(), 0);
         assert_eq!(game_state.question_card_storage.num_cards_total(), 1);
+
         assert_eq!(game_state_builder.num_answer_cards_in_storage(), 30);
+        assert_eq!(game_state_builder.num_question_cards_in_storage(), 1);
+        assert_eq!(
+            game_state_builder.num_players(),
+            0,
+            "Player map in builder should be reset."
+        );
     }
 
     #[test]
