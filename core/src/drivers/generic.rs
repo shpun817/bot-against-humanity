@@ -213,11 +213,13 @@ mod integration_tests {
         driver.add_new_answers(answers());
     }
 
-    fn set_up_a_game(mut driver: GenericDriver) -> GenericDriver {
+    fn set_up_a_game(mut driver: GenericDriver, add_players: bool) -> GenericDriver {
         driver.set_hand_size(10);
 
-        for player in players() {
-            driver.add_player(player).unwrap();
+        if add_players {
+            for player in players() {
+                driver.add_player(player).unwrap();
+            }
         }
 
         driver.add_new_questions(questions());
@@ -229,7 +231,7 @@ mod integration_tests {
 
     #[test]
     fn test_run_a_game() {
-        run_a_game(set_up_a_game(GenericDriver::new()));
+        run_a_game(set_up_a_game(GenericDriver::new(), true));
     }
 
     fn run_a_game(mut driver: GenericDriver) -> GenericDriver {
@@ -311,11 +313,13 @@ mod integration_tests {
 
     #[test]
     fn test_run_multiple_times() {
-        let driver = run_a_game(set_up_a_game(GenericDriver::new()));
+        let driver = run_a_game(set_up_a_game(GenericDriver::new(), true));
 
-        let driver = run_a_game(set_up_a_game(driver));
-        let driver = run_a_game(set_up_a_game(driver));
-        run_a_game(set_up_a_game(driver));
+        let mut driver = run_a_game(set_up_a_game(driver, false));
+
+        driver.remove_all_players();
+        let driver = run_a_game(set_up_a_game(driver, true));
+        run_a_game(set_up_a_game(driver, false));
     }
 
     fn find_non_judge_players(judge_name: &String) -> Vec<String> {

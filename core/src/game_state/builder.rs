@@ -111,9 +111,9 @@ where
         }
 
         let mut players = HashMap::from_iter(
-            std::mem::take(&mut self.players)
-                .into_iter()
-                .map(|player_name| (player_name, Player::new())),
+            self.players
+                .iter()
+                .map(|player_name| (player_name.clone(), Player::new())),
         );
         let mut question_card_storage = CardStorage::from_cards(self.questions.clone());
         let mut answer_card_storage = CardStorage::from_cards(self.answers.clone());
@@ -271,8 +271,8 @@ mod tests {
         assert_eq!(game_state_builder.num_questions(), 1);
         assert_eq!(
             game_state_builder.num_players(),
-            0,
-            "Player map in builder should be reset."
+            3,
+            "Player map in builder should not be reset."
         );
     }
 
