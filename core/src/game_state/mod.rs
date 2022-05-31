@@ -104,11 +104,13 @@ where
         }
 
         if let Some(player) = self.players.get_mut(player_name) {
-            let played_cards = player.play_cards(indices)?;
+            let played_cards_content = player.play_cards_content(indices)?;
 
-            let combined_answer = question.combine_with_answer_cards(&played_cards)?;
+            let combined_answer = question.combine_with_answers(&played_cards_content)?;
             self.submitted_answers_display
                 .insert(player_name.clone(), combined_answer);
+
+            let played_cards = player.remove_cards(indices)?;
 
             played_cards
                 .into_iter()

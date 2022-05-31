@@ -4,7 +4,7 @@ use regex::Regex;
 
 use crate::errors::GameCoreError;
 
-use super::{answer_card::AnswerCard, card::Card};
+use super::card::Card;
 
 #[derive(Clone, Debug)]
 pub(crate) struct QuestionCard {
@@ -71,14 +71,16 @@ impl QuestionCard {
         self.tokens.iter().filter(|token| token.is_none()).count()
     }
 
-    pub(crate) fn combine_with_answer_cards(
+    pub(crate) fn combine_with_answers(
         &self,
-        answer_cards: &[AnswerCard],
+        answers: impl IntoIterator<Item = impl Into<String>>,
     ) -> Result<String, GameCoreError> {
-        if self.num_blanks() != answer_cards.len() {
+        let answers: Vec<String> = answers.into_iter().map(|a| a.into()).collect();
+
+        if self.num_blanks() != answers.len() {
             return Err(GameCoreError::QuestionBlanksAndNumAnswersMismatch {
                 num_blanks: self.num_blanks(),
-                num_answers: answer_cards.len(),
+                num_answers: answers.len(),
             });
         }
 
@@ -91,7 +93,7 @@ impl QuestionCard {
                 let token_str = if let Some(token_str) = token {
                     token_str
                 } else {
-                    let answer_str = &answer_cards[current_answer].content;
+                    let answer_str = &answers[current_answer];
                     current_answer += 1;
                     answer_str
                 };
@@ -210,18 +212,18 @@ mod tests {
     #[test]
     fn combine_with_answer_cards_question() {
         let question_card = QuestionCard::new("Who am I?");
-        let answer_cards = vec![AnswerCard::new("Your Father")];
+        let answer_cards = vec!["Your Father"];
 
-        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        let combine_result = question_card.combine_with_answers(answer_cards);
         assert_eq!(combine_result.ok().unwrap(), "Who am I? Your Father");
     }
 
     #[test]
     fn combine_with_answer_cards_fill_single_blank() {
         let question_card = QuestionCard::new("I am _.");
-        let answer_cards = vec![AnswerCard::new("Your Father")];
+        let answer_cards = vec!["Your Father"];
 
-        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        let combine_result = question_card.combine_with_answers(answer_cards);
         assert_eq!(combine_result.ok().unwrap(), "I am Your Father.");
     }
 
@@ -229,11 +231,11 @@ mod tests {
     fn combine_with_answer_cards_fill_multiple_blanks() {
         let question_card = QuestionCard::new("I am _, and you are _.");
         let answer_cards = vec![
-            AnswerCard::new("Your Father"),
-            AnswerCard::new("Luke Skywalker"),
+            "Your Father",
+            "Luke Skywalker",
         ];
 
-        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        let combine_result = question_card.combine_with_answers(answer_cards);
         assert_eq!(
             combine_result.ok().unwrap(),
             "I am Your Father, and you are Luke Skywalker."
@@ -244,12 +246,12 @@ mod tests {
     fn combine_with_wrong_number_of_answer_cards() {
         let question_card = QuestionCard::new("I am _, and you are _.");
         let answer_cards = vec![
-            AnswerCard::new("Your Father"),
-            AnswerCard::new("My Mother"),
-            AnswerCard::new("Luke Skywalker"),
+            "Your Father",
+            "My Mother",
+            "Luke Skywalker",
         ];
 
-        let combine_result = question_card.combine_with_answer_cards(&answer_cards);
+        let combine_result = question_card.combine_with_answers(answer_cards);
         assert_eq!(
             combine_result.err().unwrap(),
             GameCoreError::QuestionBlanksAndNumAnswersMismatch {

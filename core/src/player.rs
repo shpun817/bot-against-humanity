@@ -39,27 +39,25 @@ impl Player {
     }
 
     /// `indices` are ZERO-based indices of the hand.
-    pub(crate) fn play_cards(
+    pub(crate) fn play_cards_content(&self, indices: &[usize]) -> Result<Vec<String>, GameCoreError> {
+        let ind_set = self.validate_indices(indices)?;
+
+        Ok(
+            indices
+                .iter()
+                .map(|&ind| self.hand[ind].content.clone())
+                .collect::<Vec<_>>()
+        )
+    }
+
+    /// `indices` are ZERO-based indices of the hand.
+    pub(crate) fn remove_cards(
         &mut self,
         indices: &[usize],
     ) -> Result<Vec<AnswerCard>, GameCoreError> {
-        let mut ind_set = HashSet::new();
-        for &ind in indices.iter() {
-            if ind >= self.hand.len() {
-                return Err(GameCoreError::PlayerChoosingCardOutOfHandBound {
-                    chosen_ind: ind,
-                    hand_bound: self.hand.len(),
-                });
-            }
-            if ind_set.contains(&ind) {
-                return Err(GameCoreError::PlayerChoosingTheSameCardMultipleTimes {
-                    chosen_ind: ind,
-                });
-            }
-            ind_set.insert(ind);
-        }
+        let ind_set = self.validate_indices(indices)?;
 
-        let played_cards = indices
+        let removed_cards = indices
             .iter()
             .map(|&ind| self.hand[ind].clone())
             .collect::<Vec<_>>();
@@ -77,7 +75,28 @@ impl Player {
             })
             .collect();
 
-        Ok(played_cards)
+        Ok(removed_cards)
+    }
+
+    fn validate_indices(&self, indices: &[usize]) -> Result<HashSet<usize>, GameCoreError> {
+        let mut ind_set = HashSet::new();
+
+        for &ind in indices.iter() {
+            if ind >= self.hand.len() {
+                return Err(GameCoreError::PlayerChoosingCardOutOfHandBound {
+                    chosen_ind: ind,
+                    hand_bound: self.hand.len(),
+                });
+            }
+            if ind_set.contains(&ind) {
+                return Err(GameCoreError::PlayerChoosingTheSameCardMultipleTimes {
+                    chosen_ind: ind,
+                });
+            }
+            ind_set.insert(ind);
+        }
+
+        Ok(ind_set)
     }
 }
 
@@ -117,14 +136,57 @@ mod tests {
             player.add_card_to_hand(AnswerCard::new(i.to_string()));
         }
 
-        let played_cards = player.play_cards(&[0, 6, 4]).unwrap();
+        let played_cards = player.play_cards_content(&[0, 6, 4]).unwrap();
 
         assert_eq!(played_cards.len(), 3);
-        assert_eq!(played_cards[0].content, "0");
-        assert_eq!(played_cards[1].content, "6");
-        assert_eq!(played_cards[2].content, "4");
+        assert_eq!(played_cards[0], "0");
+        assert_eq!(played_cards[1], "6");
+        assert_eq!(played_cards[2], "4");
+
+        assert_eq!(player.hand_size(), 10);
+    }
+
+    #[test]
+    fn remove_cards() {
+        let mut player = Player::new();
+
+        for i in 0..10 {
+            player.add_card_to_hand(AnswerCard::new(i.to_string()));
+        }
+
+        let removed_cards = player.remove_cards(&[0, 6, 4]).unwrap();
+
+        assert_eq!(removed_cards.len(), 3);
+        assert_eq!(removed_cards[0].content, "0");
+        assert_eq!(removed_cards[1].content, "6");
+        assert_eq!(removed_cards[2].content, "4");
 
         assert_eq!(player.hand_size(), 7);
+    }
+
+    #[test]
+    fn remove_cards_out_of_bounds() {
+        let mut player = Player::new();
+
+        for i in 0..10 {
+            player.add_card_to_hand(AnswerCard::new(i.to_string()));
+        }
+
+        let remove_cards_result = player.remove_cards(&[0, 10, 4]);
+
+        assert_eq!(
+            remove_cards_result.err().unwrap(),
+            GameCoreError::PlayerChoosingCardOutOfHandBound {
+                chosen_ind: 10,
+                hand_bound: 10
+            }
+        );
+
+        assert_eq!(
+            player.hand_size(),
+            10,
+            "Player's cards are played even though there's an error."
+        );
     }
 
     #[test]
@@ -135,7 +197,7 @@ mod tests {
             player.add_card_to_hand(AnswerCard::new(i.to_string()));
         }
 
-        let play_cards_result = player.play_cards(&[0, 10, 4]);
+        let play_cards_result = player.play_cards_content(&[0, 10, 4]);
 
         assert_eq!(
             play_cards_result.err().unwrap(),
@@ -153,6 +215,28 @@ mod tests {
     }
 
     #[test]
+    fn remove_same_cards_multiple_times() {
+        let mut player = Player::new();
+
+        for i in 0..10 {
+            player.add_card_to_hand(AnswerCard::new(i.to_string()));
+        }
+
+        let remove_cards_result = player.remove_cards(&[0, 0, 4]);
+
+        assert_eq!(
+            remove_cards_result.err().unwrap(),
+            GameCoreError::PlayerChoosingTheSameCardMultipleTimes { chosen_ind: 0 }
+        );
+
+        assert_eq!(
+            player.hand_size(),
+            10,
+            "Player's cards are played even though there's an error."
+        );
+    }
+
+    #[test]
     fn play_same_cards_multiple_times() {
         let mut player = Player::new();
 
@@ -160,10 +244,10 @@ mod tests {
             player.add_card_to_hand(AnswerCard::new(i.to_string()));
         }
 
-        let play_cards_result = player.play_cards(&[0, 0, 4]);
+        let remove_cards_result = player.play_cards_content(&[0, 0, 4]);
 
         assert_eq!(
-            play_cards_result.err().unwrap(),
+            remove_cards_result.err().unwrap(),
             GameCoreError::PlayerChoosingTheSameCardMultipleTimes { chosen_ind: 0 }
         );
 
