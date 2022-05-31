@@ -84,20 +84,23 @@ impl GameCoreDriver for GenericDriver {
     type RoundStartInfo = RoundInformation;
     type RoundEndInfo = Vec<(Self::PlayerName, i32)>;
 
-    fn start_game(&mut self) -> Result<(), Self::Error> {
+    fn start_game(&mut self) -> Result<Vec<Self::PlayerName>, Self::Error> {
         if self.game_state.is_some() {
             return Err("A game is already in progress.".to_owned());
         }
 
-        self.game_state = Some(
-            self.game_state_builder
+        let game_state = self.game_state_builder
                 .build(self.hand_size)
-                .map_err(|e| e.to_string())?,
-        );
+                .map_err(|e| e.to_string())?;
 
-        Ok(())
+        let ordered_players = game_state.ordered_players();
+
+        self.game_state = Some(game_state);
+
+        Ok(ordered_players)
     }
 
+    /// Only return Err() when the game is not started.
     fn start_round(&mut self) -> Result<Self::RoundStartInfo, Self::Error> {
         self.is_game_started_guard()?;
 
@@ -112,7 +115,7 @@ impl GameCoreDriver for GenericDriver {
 
     fn submit_answers(
         &mut self,
-        player_name: Self::PlayerName,
+        player_name: impl Into<Self::PlayerName>,
         answer_indices: impl IntoIterator<Item = impl Into<usize>>,
     ) -> Result<Option<Vec<(Self::PlayerName, String)>>, Self::Error> {
         self.is_game_started_guard()?;
@@ -122,20 +125,21 @@ impl GameCoreDriver for GenericDriver {
         self.game_state
             .as_mut()
             .unwrap()
-            .submit_answers(&player_name, &answer_indices)
+            .submit_answers(&player_name.into(), &answer_indices)
             .map_err(|e| e.to_string())
     }
 
+    /// Return Err() only when the game is not started or `chosen_player` is unknown.
     fn end_round(
         &mut self,
-        chosen_player: Self::PlayerName,
+        chosen_player: impl Into<Self::PlayerName>,
     ) -> Result<Self::RoundEndInfo, Self::Error> {
         self.is_game_started_guard()?;
 
         self.game_state
             .as_mut()
             .unwrap()
-            .increment_awesome_points(&chosen_player)
+            .increment_awesome_points(&chosen_player.into())
             .map_err(|e| e.to_string())?;
 
         Ok(self

@@ -41,6 +41,10 @@ impl<PN> GameState<PN>
 where
     PN: PlayerName,
 {
+    pub fn ordered_players(&self) -> Vec<PN> {
+        self.ordered_players.clone()
+    }
+
     /// Change the Judge to the next player and return the player's name
     pub fn next_judge(&mut self) -> PN {
         self.current_judge = (self.current_judge + 1) % self.num_players;
@@ -75,6 +79,7 @@ where
             .collect()
     }
 
+    /// The returned all submitted answers are already shuffled.
     pub fn submit_answers(
         &mut self,
         player_name: &PN,

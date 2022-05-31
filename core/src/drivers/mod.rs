@@ -8,16 +8,16 @@ pub trait GameCoreDriver {
     type RoundStartInfo;
     type RoundEndInfo;
 
-    fn start_game(&mut self) -> Result<(), Self::Error>;
+    fn start_game(&mut self) -> Result<Vec<Self::PlayerName>, Self::Error>;
     fn start_round(&mut self) -> Result<Self::RoundStartInfo, Self::Error>;
     fn submit_answers(
         &mut self,
-        player_name: Self::PlayerName,
+        player_name: impl Into<Self::PlayerName>,
         answer_indices: impl IntoIterator<Item = impl Into<usize>>,
     ) -> Result<AllSubmittedAnswers<Self::PlayerName>, Self::Error>;
     fn end_round(
         &mut self,
-        chosen_player: Self::PlayerName,
+        chosen_player: impl Into<Self::PlayerName>,
     ) -> Result<Self::RoundEndInfo, Self::Error>;
     fn end_game(&mut self) -> Result<(), Self::Error>;
 }
