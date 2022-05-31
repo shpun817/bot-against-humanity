@@ -7,7 +7,7 @@ use assets::{answers, questions};
 use bot_against_humanity_core::drivers::{generic::GenericDriver, GameCoreDriver};
 use input::CountBase;
 
-use crate::input::InputManager;
+use crate::input::{InputManager, PreparationInput};
 
 type Error = String;
 
@@ -40,25 +40,36 @@ fn main() {
     loop {
         // Preparation
         println!("Preparation stage!");
+        println!("Add a Player: /add `Player Name`");
+        println!("Start the game: /start");
+        println!("Set hand size: /handsize `Number >= 1`");
+        println!("Set win target: /wintarget `Number >= 1`");
+        println!("Set count base: /countbase `0 or 1`");
+
         let ordered_players = loop {
             match InputManager::preparation_input() {
-                input::PreparationInput::Start => match driver.start_game() {
+                PreparationInput::Start => match driver.start_game() {
                     Ok(ordered_players) => break ordered_players,
                     Err(err) => error_handler(err),
                 },
-                input::PreparationInput::AddPlayer(player_name) => {
+                PreparationInput::AddPlayer(player_name) => {
                     if let Err(err) = driver.add_player(&player_name) {
                         error_handler(err)
                     } else {
                         println!("{} joins the game!", player_name);
                     }
                 }
-                input::PreparationInput::SetHandSize(hand_size) => driver.set_hand_size(hand_size),
-                input::PreparationInput::SetWinTarget(win_target) => config.win_target = win_target,
-                input::PreparationInput::SetCountBaseOne => config.count_base = CountBase::OneBased,
-                input::PreparationInput::SetCountBaseZero => {
-                    config.count_base = CountBase::ZeroBased
+                PreparationInput::RemovePlayer(player_name) => {
+                    if let Err(err) = driver.remove_player(&player_name) {
+                        error_handler(err)
+                    } else {
+                        println!("{} leaves the game!", player_name);
+                    }
                 }
+                PreparationInput::SetHandSize(hand_size) => driver.set_hand_size(hand_size),
+                PreparationInput::SetWinTarget(win_target) => config.win_target = win_target,
+                PreparationInput::SetCountBaseOne => config.count_base = CountBase::OneBased,
+                PreparationInput::SetCountBaseZero => config.count_base = CountBase::ZeroBased,
             }
         };
 
@@ -122,7 +133,7 @@ fn main() {
                         },
                         answer
                     );
-                    
+
                     for _ in 0..3 {
                         print!(".");
                         sleep(1);
@@ -134,7 +145,7 @@ fn main() {
 
             let ranking = loop {
                 let chosen_index = InputManager::choose_favorite(config.count_base);
-                
+
                 let chosen_player = if let Some((player, _)) = submitted_answers.get(chosen_index) {
                     player
                 } else {
@@ -165,7 +176,7 @@ fn main() {
             }
 
             if highest.1 >= config.win_target as i32 {
-                println!("Congratulations, {}, You Have Won!", highest.0);
+                println!("🎉 Congratulations, {}, You Have Won! 🎉\n", highest.0);
                 break;
             }
         }

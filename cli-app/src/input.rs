@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{io::Write, str::FromStr};
 
 use crate::error_handler;
 
@@ -7,6 +7,7 @@ pub(crate) struct InputManager;
 pub(crate) enum PreparationInput {
     Start,
     AddPlayer(String),
+    RemovePlayer(String),
     SetHandSize(usize),  // Must be >= 1
     SetWinTarget(usize), // Must be >= 1
     SetCountBaseOne,
@@ -25,13 +26,14 @@ impl InputManager {
     /// Valid input:
     /// - /start
     /// - /add `Player Name`
+    /// - /remove `Player Name`
     /// - /handsize `usize >= 1`
     /// - /wintarget `usize >= 1`
     /// - /countbase `0 or 1`
     pub fn preparation_input() -> PreparationInput {
         let tokens = Self::read_line_as_tokens_until_no_error(|tokens: &Vec<String>| {
             tokens[0] == "/start"
-                || (tokens[0] == "/add" && tokens.len() >= 2)
+                || ((tokens[0] == "/add" || tokens[0] == "/remove") && tokens.len() >= 2)
                 || ((tokens[0] == "/handsize" || tokens[0] == "/wintarget")
                     && tokens.len() == 2
                     && if let Ok(handsize) = tokens[1].parse::<usize>() {
@@ -49,6 +51,7 @@ impl InputManager {
         } else {
             match tokens[0].as_str() {
                 "/add" => PreparationInput::AddPlayer(tokens[1..].join(" ")),
+                "/remove" => PreparationInput::RemovePlayer(tokens[1..].join("")),
                 "/handsize" => PreparationInput::SetHandSize(tokens[1].parse::<usize>().unwrap()),
                 "/wintarget" => PreparationInput::SetWinTarget(tokens[1].parse::<usize>().unwrap()),
                 "/countbase" => match tokens[1].as_str() {
@@ -73,9 +76,7 @@ impl InputManager {
         });
 
         if let CountBase::OneBased = count_base {
-            indices.into_iter()
-                .map(|ind| ind - 1)
-                .collect()
+            indices.into_iter().map(|ind| ind - 1).collect()
         } else {
             indices
         }
@@ -146,6 +147,9 @@ impl InputManager {
 
     fn read_line() -> Result<String, Error> {
         let mut input = String::new();
+
+        print!("\n> ");
+        std::io::stdout().flush().unwrap();
 
         std::io::stdin()
             .read_line(&mut input)
