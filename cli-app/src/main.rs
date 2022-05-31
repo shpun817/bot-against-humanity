@@ -184,7 +184,8 @@ fn main() {
             }
 
             if highest.1 >= config.win_target as i32 {
-                println!("🎉 Congratulations, {}, You Have Won! 🎉\n", highest.0);
+                println!("🎉 Congratulations, {}, You Have Won! 🎉\n", color_player_name(highest.0));
+                driver.end_game().unwrap();
                 break;
             }
         }
