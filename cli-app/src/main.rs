@@ -1,10 +1,11 @@
 mod assets;
 mod input;
 
-use std::{thread, time::Duration};
+use std::{thread, time::Duration, io::Write};
 
 use assets::{answers, questions};
 use bot_against_humanity_core::drivers::{generic::GenericDriver, GameCoreDriver};
+use colored::{Colorize, ColoredString};
 use input::CountBase;
 
 use crate::input::{InputManager, PreparationInput};
@@ -56,14 +57,14 @@ fn main() {
                     if let Err(err) = driver.add_player(&player_name) {
                         error_handler(err)
                     } else {
-                        println!("{} joins the game!", player_name);
+                        println!("{} joins the game!", color_player_name(player_name));
                     }
                 }
                 PreparationInput::RemovePlayer(player_name) => {
                     if let Err(err) = driver.remove_player(&player_name) {
                         error_handler(err)
                     } else {
-                        println!("{} leaves the game!", player_name);
+                        println!("{} leaves the game!", color_player_name(player_name));
                     }
                 }
                 PreparationInput::SetHandSize(hand_size) => driver.set_hand_size(hand_size),
@@ -79,10 +80,10 @@ fn main() {
                 find_non_judge_players(&ordered_players, &round_information.judge);
 
             // Display round information to users
-            println!("The Judge for this round is {}!", round_information.judge);
+            println!("The Judge for this round is {}!", color_player_name(&round_information.judge));
             let submitted_answers = non_judge_players.into_iter().fold(vec![], |_, player| {
                 println!("======================================================");
-                println!("{}, Your hand is:", player);
+                println!("{}, Your hand is:", color_player_name(player));
                 for (i, card_content) in round_information
                     .player_hands
                     .get(player)
@@ -101,7 +102,7 @@ fn main() {
                     );
                 }
                 println!("\nAnswer this: {}", round_information.question);
-                println!("Please submit your answers, {}", player);
+                println!("Please submit your answers, {}", color_player_name(player));
                 let submitted_answers = loop {
                     let answers = InputManager::submit_answers(config.count_base);
                     match driver.submit_answers(player, answers) {
@@ -136,11 +137,12 @@ fn main() {
 
                     for _ in 0..3 {
                         print!(".");
+                        std::io::stdout().flush().unwrap();
                         sleep(1);
                     }
                     println!();
                 }
-                println!("Choose your favorite, Judge {}!", round_information.judge);
+                println!("Choose your favorite, Judge {}!", color_player_name(round_information.judge));
             }
 
             let ranking = loop {
@@ -169,7 +171,13 @@ fn main() {
                     if points != last_points {
                         rank_tracker += 1
                     }
-                    println!("{} {} - {}", rank_tracker, name, points);
+                    println!("{} {} - {}", {
+                        if rank_tracker == 1 {
+                            rank_tracker.to_string().red().bold()
+                        } else {
+                            rank_tracker.to_string().as_str().into()
+                        }
+                    }, color_player_name(name), points);
                     last_points = points;
                 }
                 println!("======================================================");
@@ -181,6 +189,10 @@ fn main() {
             }
         }
     }
+}
+
+fn color_player_name(text: impl Into<String>) -> ColoredString {
+    text.into().green().bold()
 }
 
 fn find_non_judge_players<'a>(
