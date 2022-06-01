@@ -2,11 +2,17 @@ use wasm_bindgen::prelude::*;
 
 use crate::{drivers::GameCoreDriver, error::GameCoreError};
 
-use super::generic::GenericDriver;
+use super::generic::{GenericDriver, GenericDriverBuilder};
+
+/// Expose the API of `GenericDriverBuilder` to WASM
+#[wasm_bindgen]
+#[derive(Default)]
+pub struct WasmDriverBuilder {
+    generic_driver_builder: GenericDriverBuilder,
+}
 
 /// Expose the API of `GenericDriver` to WASM
 #[wasm_bindgen]
-#[derive(Default)]
 pub struct WasmDriver {
     generic_driver: GenericDriver,
 }
@@ -20,7 +26,7 @@ impl From<Error> for JsValue {
 }
 
 #[wasm_bindgen]
-impl WasmDriver {
+impl WasmDriverBuilder {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Default::default()
@@ -28,22 +34,22 @@ impl WasmDriver {
 
     #[wasm_bindgen(js_name = setHandSize)]
     pub fn set_hand_size(&mut self, hand_size: usize) {
-        self.generic_driver.set_hand_size(hand_size);
+        self.generic_driver_builder.set_hand_size(hand_size);
     }
 
     #[wasm_bindgen(js_name = addPlayer)]
     pub fn add_player(&mut self, player_name: &str) -> Result<(), Error> {
-        self.generic_driver.add_player(player_name)
+        self.generic_driver_builder.add_player(player_name)
     }
 
     #[wasm_bindgen(js_name = removePlayer)]
     pub fn remove_player(&mut self, player_name: &str) -> Result<(), Error> {
-        self.generic_driver.remove_player(player_name)
+        self.generic_driver_builder.remove_player(player_name)
     }
 
     #[wasm_bindgen(js_name = removeAllPlayers)]
     pub fn remove_all_players(&mut self) {
-        self.generic_driver.remove_all_players()
+        self.generic_driver_builder.remove_all_players()
     }
 
     #[wasm_bindgen(js_name = addNewQuestions)]
@@ -52,14 +58,14 @@ impl WasmDriver {
             .into_serde()
             .map_err(|_| "Supplied questions are not an array of strings.")?;
 
-        self.generic_driver.add_new_questions(questions);
+        self.generic_driver_builder.add_new_questions(questions);
 
         Ok(())
     }
 
     #[wasm_bindgen(js_name = clearAllQuestions)]
     pub fn clear_all_questions(&mut self) {
-        self.generic_driver.clear_all_questions();
+        self.generic_driver_builder.clear_all_questions();
     }
 
     #[wasm_bindgen(js_name = addNewAnswers)]
@@ -68,44 +74,51 @@ impl WasmDriver {
             .into_serde()
             .map_err(|_| "Supplied answers are not an array of strings.")?;
 
-        self.generic_driver.add_new_answers(answers);
+        self.generic_driver_builder.add_new_answers(answers);
 
         Ok(())
     }
 
     #[wasm_bindgen(js_name = clearAllAnswers)]
     pub fn clear_all_answers(&mut self) {
-        self.generic_driver.clear_all_answers();
+        self.generic_driver_builder.clear_all_answers();
+    }
+
+    /// - Success: a WasmDriver (game driver)
+    /// - Failure: a string (error message)
+    #[wasm_bindgen(js_name = build)]
+    pub fn build(&self) -> Result<WasmDriver, Error> {
+        self.generic_driver_builder
+            .build()
+            .map(|generic_driver| WasmDriver { generic_driver })
     }
 }
 
 // WASM API for GameCoreDriver trait functions in GenericDriver
 #[wasm_bindgen]
 impl WasmDriver {
-    /// From JavaScript:
-    /// - Success: an array of strings (player names)
-    /// - Failure: a string (error message)
-    #[wasm_bindgen(js_name = startGame)]
-    pub fn start_game(&mut self) -> Result<JsValue, GameCoreError> {
-        self.generic_driver
-            .start_game()
-            .map(|player_names| JsValue::from_serde(&player_names).unwrap())
+    /// Return an array of strings (ordered all player names)
+    #[wasm_bindgen(js_name = orderedPlayers)]
+    pub fn orderedPlayers(&self) -> JsValue {
+        let ordered_players = self.generic_driver.ordered_players();
+
+        JsValue::from_serde(&ordered_players).unwrap()
     }
 
-    /// From JavaScript:
-    /// - Success: an object { judge: string, question: string, player_hands: { `name`: \[`answer`: string\] } }
-    /// - Failure: a string (error message)
+    /// Return an object { judge: string, question: string, player_hands: { `name`: \[`answer`: string\] } }
     #[wasm_bindgen(js_name = startRound)]
-    pub fn start_round(&mut self) -> Result<JsValue, GameCoreError> {
-        self.generic_driver
-            .start_round()
-            .map(|round_info| JsValue::from_serde(&round_info).unwrap())
+    pub fn start_round(&mut self) -> JsValue {
+        let round_info = self.generic_driver.start_round();
+
+        JsValue::from_serde(&round_info).unwrap()
     }
 
     /// From JavaScript:
     /// - Input: `player_name`: string, `answer_indices`: \[number >= 0\]
     /// - Success: null | an array of tuples of two strings (player names and their combined answers)
     /// - Failure: a string (error message)
+    ///
+    /// `answer_indices` correspond to ZERO-based indices of the player's hand.
     #[wasm_bindgen(js_name = submitAnswers)]
     pub fn submit_answers(
         &mut self,
@@ -128,11 +141,11 @@ impl WasmDriver {
             .map(|ranking| JsValue::from_serde(&ranking).unwrap())
     }
 
-    /// From JavaScript:
-    /// - Success: void
-    /// - Failure: a string (error message)
+    /// Invalidate this driver object.
+    ///
+    /// No side effects.
     #[wasm_bindgen(js_name = endGame)]
-    pub fn end_game(&mut self) -> Result<(), GameCoreError> {
+    pub fn end_game(self) {
         self.generic_driver.end_game()
     }
 }
