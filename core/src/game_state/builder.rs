@@ -91,7 +91,7 @@ where
         answers.into_iter().for_each(|a| self.add_new_answer(a));
     }
 
-    pub fn build(&mut self, num_cards_per_player: usize) -> Result<GameState<PN>, GameCoreError> {
+    pub fn build(&self, num_cards_per_player: usize) -> Result<GameState<PN>, GameCoreError> {
         let num_players = self.players.len();
         if num_players < 3 {
             return Err(GameCoreError::NotEnoughPlayers { num_players });
