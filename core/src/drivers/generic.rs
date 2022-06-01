@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use serde::Serialize;
+
 use crate::{
     error::GameCoreError,
     game_state::{GameState, GameStateBuilder},
@@ -14,6 +16,7 @@ pub struct GenericDriver {
     hand_size: usize,
 }
 
+#[derive(Serialize)]
 pub struct RoundInformation {
     pub judge: String,
     pub question: String,
