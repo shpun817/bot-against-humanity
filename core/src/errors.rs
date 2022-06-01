@@ -35,6 +35,8 @@ pub enum GameCoreError {
     PlayerDoesNotExist {
         name: String,
     },
+    GameNotStarted,
+    GameAlreadyInProgress,
 }
 
 impl Display for GameCoreError {
@@ -91,8 +93,16 @@ impl Display for GameCoreError {
             GameCoreError::PlayerAlreadySubmittedAnswers { player_name } => {
                 format!("Player {} already submitted answers.", player_name)
             }
+            GameCoreError::GameNotStarted => "The game is not started.".to_owned(),
+            GameCoreError::GameAlreadyInProgress => "The game is already in progress.".to_owned(),
         };
 
         write!(f, "GameCoreError: {}", msg)
+    }
+}
+
+impl From<GameCoreError> for String {
+    fn from(val: GameCoreError) -> Self {
+        val.to_string()
     }
 }

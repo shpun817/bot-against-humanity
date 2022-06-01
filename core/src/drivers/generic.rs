@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::game_state::{GameState, GameStateBuilder};
+use crate::{
+    errors::GameCoreError,
+    game_state::{GameState, GameStateBuilder},
+};
 
 use super::GameCoreDriver;
 
@@ -37,16 +40,12 @@ impl GenericDriver {
         self.hand_size = hand_size;
     }
 
-    pub fn add_player(&mut self, player_name: impl Into<String>) -> Result<(), String> {
-        self.game_state_builder
-            .add_new_player(player_name)
-            .map_err(|e| e.to_string())
+    pub fn add_player(&mut self, player_name: impl Into<String>) -> Result<(), GameCoreError> {
+        self.game_state_builder.add_new_player(player_name)
     }
 
-    pub fn remove_player(&mut self, player_name: impl Into<String>) -> Result<(), String> {
-        self.game_state_builder
-            .withdraw_player(player_name)
-            .map_err(|e| e.to_string())
+    pub fn remove_player(&mut self, player_name: impl Into<String>) -> Result<(), GameCoreError> {
+        self.game_state_builder.withdraw_player(player_name)
     }
 
     pub fn remove_all_players(&mut self) {
@@ -69,9 +68,9 @@ impl GenericDriver {
         self.game_state_builder.remove_all_answers();
     }
 
-    fn is_game_started_guard(&self) -> Result<(), String> {
+    fn is_game_started_guard(&self) -> Result<(), GameCoreError> {
         if self.game_state.is_none() {
-            Err("The game is not started.".to_owned())
+            Err(GameCoreError::GameNotStarted)
         } else {
             Ok(())
         }
@@ -80,18 +79,16 @@ impl GenericDriver {
 
 impl GameCoreDriver for GenericDriver {
     type PlayerName = String;
-    type Error = String;
+    type Error = GameCoreError;
     type RoundStartInfo = RoundInformation;
     type RoundEndInfo = Vec<(Self::PlayerName, i32)>;
 
     fn start_game(&mut self) -> Result<Vec<Self::PlayerName>, Self::Error> {
         if self.game_state.is_some() {
-            return Err("A game is already in progress.".to_owned());
+            return Err(GameCoreError::GameAlreadyInProgress);
         }
 
-        let game_state = self.game_state_builder
-                .build(self.hand_size)
-                .map_err(|e| e.to_string())?;
+        let game_state = self.game_state_builder.build(self.hand_size)?;
 
         let ordered_players = game_state.ordered_players();
 
@@ -126,7 +123,6 @@ impl GameCoreDriver for GenericDriver {
             .as_mut()
             .unwrap()
             .submit_answers(&player_name.into(), &answer_indices)
-            .map_err(|e| e.to_string())
     }
 
     /// Return Err() only when the game is not started or `chosen_player` is unknown.
@@ -139,8 +135,7 @@ impl GameCoreDriver for GenericDriver {
         self.game_state
             .as_mut()
             .unwrap()
-            .increment_awesome_points(&chosen_player.into())
-            .map_err(|e| e.to_string())?;
+            .increment_awesome_points(&chosen_player.into())?;
 
         Ok(self
             .game_state
