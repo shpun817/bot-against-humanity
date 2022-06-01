@@ -26,22 +26,27 @@ impl WasmDriver {
         Default::default()
     }
 
+    #[wasm_bindgen(js_name = setHandSize)]
     pub fn set_hand_size(&mut self, hand_size: usize) {
         self.generic_driver.set_hand_size(hand_size);
     }
 
+    #[wasm_bindgen(js_name = addPlayer)]
     pub fn add_player(&mut self, player_name: &str) -> Result<(), Error> {
         self.generic_driver.add_player(player_name)
     }
 
+    #[wasm_bindgen(js_name = removePlayer)]
     pub fn remove_player(&mut self, player_name: &str) -> Result<(), Error> {
         self.generic_driver.remove_player(player_name)
     }
 
+    #[wasm_bindgen(js_name = removeAllPlayers)]
     pub fn remove_all_players(&mut self) {
         self.generic_driver.remove_all_players()
     }
 
+    #[wasm_bindgen(js_name = addNewQuestions)]
     pub fn add_new_questions(&mut self, questions: JsValue) -> Result<(), Error> {
         let questions: Vec<String> = questions
             .into_serde()
@@ -52,10 +57,12 @@ impl WasmDriver {
         Ok(())
     }
 
+    #[wasm_bindgen(js_name = clearAllQuestions)]
     pub fn clear_all_questions(&mut self) {
         self.generic_driver.clear_all_questions();
     }
 
+    #[wasm_bindgen(js_name = addNewAnswers)]
     pub fn add_new_answers(&mut self, answers: JsValue) -> Result<(), Error> {
         let answers: Vec<String> = answers
             .into_serde()
@@ -66,6 +73,7 @@ impl WasmDriver {
         Ok(())
     }
 
+    #[wasm_bindgen(js_name = clearAllAnswers)]
     pub fn clear_all_answers(&mut self) {
         self.generic_driver.clear_all_answers();
     }
@@ -77,6 +85,7 @@ impl WasmDriver {
     /// From JavaScript:
     /// - Success: an array of strings (player names)
     /// - Failure: a string (error message)
+    #[wasm_bindgen(js_name = startGame)]
     pub fn start_game(&mut self) -> Result<JsValue, GameCoreError> {
         self.generic_driver
             .start_game()
@@ -86,6 +95,7 @@ impl WasmDriver {
     /// From JavaScript:
     /// - Success: an object { judge: string, question: string, player_hands: { `name`: \[`answer`: string\] } }
     /// - Failure: a string (error message)
+    #[wasm_bindgen(js_name = startRound)]
     pub fn start_round(&mut self) -> Result<JsValue, GameCoreError> {
         self.generic_driver
             .start_round()
@@ -96,6 +106,7 @@ impl WasmDriver {
     /// - Input: `player_name`: string, `answer_indices`: \[number >= 0\]
     /// - Success: null | an array of tuples of two strings (player names and their combined answers)
     /// - Failure: a string (error message)
+    #[wasm_bindgen(js_name = submitAnswers)]
     pub fn submit_answers(
         &mut self,
         player_name: &str,
@@ -110,6 +121,7 @@ impl WasmDriver {
     /// - Input: `chosen_player`: string
     /// - Success: an array of tuples of a string and a number (player names and their awesome points, sorted in descending order of awesome points)
     /// - Failure: a string (error message)
+    #[wasm_bindgen(js_name = endRound)]
     pub fn end_round(&mut self, chosen_player: &str) -> Result<JsValue, GameCoreError> {
         self.generic_driver
             .end_round(chosen_player)
@@ -119,6 +131,7 @@ impl WasmDriver {
     /// From JavaScript:
     /// - Success: void
     /// - Failure: a string (error message)
+    #[wasm_bindgen(js_name = endGame)]
     pub fn end_game(&mut self) -> Result<(), GameCoreError> {
         self.generic_driver.end_game()
     }
