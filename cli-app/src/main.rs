@@ -1,11 +1,11 @@
 mod assets;
 mod input;
 
-use std::{thread, time::Duration, io::Write};
+use std::{io::Write, thread, time::Duration};
 
 use assets::{answers, questions};
-use bot_against_humanity_core::drivers::{generic::GenericDriver, GameCoreDriver};
-use colored::{Colorize, ColoredString};
+use bot_against_humanity_core::drivers::{generic::GenericDriverBuilder, GameCoreDriver};
+use colored::{ColoredString, Colorize};
 use input::CountBase;
 
 use crate::input::{InputManager, PreparationInput};
@@ -31,10 +31,10 @@ impl Default for Config {
 }
 
 fn main() {
-    let mut driver = GenericDriver::new();
+    let mut builder = GenericDriverBuilder::new();
 
-    driver.add_new_questions(questions());
-    driver.add_new_answers(answers());
+    builder.add_new_questions(questions());
+    builder.add_new_answers(answers());
 
     let mut config = Config::default();
 
@@ -47,40 +47,44 @@ fn main() {
         println!("Set win target: /wintarget `Number >= 1`");
         println!("Set count base: /countbase `0 or 1`");
 
-        let ordered_players = loop {
+        let mut driver = loop {
             match InputManager::preparation_input() {
-                PreparationInput::Start => match driver.start_game() {
-                    Ok(ordered_players) => break ordered_players,
+                PreparationInput::Start => match builder.build() {
+                    Ok(driver) => break driver,
                     Err(err) => error_handler(err),
                 },
                 PreparationInput::AddPlayer(player_name) => {
-                    if let Err(err) = driver.add_player(&player_name) {
+                    if let Err(err) = builder.add_player(&player_name) {
                         error_handler(err)
                     } else {
                         println!("{} joins the game!", color_player_name(player_name));
                     }
                 }
                 PreparationInput::RemovePlayer(player_name) => {
-                    if let Err(err) = driver.remove_player(&player_name) {
+                    if let Err(err) = builder.remove_player(&player_name) {
                         error_handler(err)
                     } else {
                         println!("{} leaves the game!", color_player_name(player_name));
                     }
                 }
-                PreparationInput::SetHandSize(hand_size) => driver.set_hand_size(hand_size),
+                PreparationInput::SetHandSize(hand_size) => builder.set_hand_size(hand_size),
                 PreparationInput::SetWinTarget(win_target) => config.win_target = win_target,
                 PreparationInput::SetCountBaseOne => config.count_base = CountBase::OneBased,
                 PreparationInput::SetCountBaseZero => config.count_base = CountBase::ZeroBased,
             }
         };
+        let ordered_players = driver.ordered_players();
 
         loop {
-            let round_information = driver.start_round().unwrap();
+            let round_information = driver.start_round();
             let non_judge_players =
                 find_non_judge_players(&ordered_players, &round_information.judge);
 
             // Display round information to users
-            println!("The Judge for this round is {}!", color_player_name(&round_information.judge));
+            println!(
+                "The Judge for this round is {}!",
+                color_player_name(&round_information.judge)
+            );
             let submitted_answers = non_judge_players.into_iter().fold(vec![], |_, player| {
                 println!("======================================================");
                 println!("{}, Your hand is:", color_player_name(player));
@@ -142,7 +146,10 @@ fn main() {
                     }
                     println!();
                 }
-                println!("Choose your favorite, Judge {}!", color_player_name(round_information.judge));
+                println!(
+                    "Choose your favorite, Judge {}!",
+                    color_player_name(round_information.judge)
+                );
             }
 
             let ranking = loop {
@@ -171,21 +178,29 @@ fn main() {
                     if points != last_points {
                         rank_tracker += 1
                     }
-                    println!("{} {} - {}", {
-                        if rank_tracker == 1 {
-                            rank_tracker.to_string().red().bold()
-                        } else {
-                            rank_tracker.to_string().as_str().into()
-                        }
-                    }, color_player_name(name), points);
+                    println!(
+                        "{} {} - {}",
+                        {
+                            if rank_tracker == 1 {
+                                rank_tracker.to_string().red().bold()
+                            } else {
+                                rank_tracker.to_string().as_str().into()
+                            }
+                        },
+                        color_player_name(name),
+                        points
+                    );
                     last_points = points;
                 }
                 println!("======================================================");
             }
 
             if highest.1 >= config.win_target as i32 {
-                println!("🎉 Congratulations, {}, You Have Won! 🎉\n", color_player_name(highest.0));
-                driver.end_game().unwrap();
+                println!(
+                    "🎉 Congratulations, {}, You Have Won! 🎉\n",
+                    color_player_name(highest.0)
+                );
+                driver.end_game();
                 break;
             }
         }
