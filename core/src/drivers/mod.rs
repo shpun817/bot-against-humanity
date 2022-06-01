@@ -1,6 +1,7 @@
 use crate::game_state::{self, AllSubmittedAnswers};
 
 pub mod generic;
+pub mod wasm;
 
 pub trait GameCoreDriver {
     type PlayerName: game_state::PlayerName;
