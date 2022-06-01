@@ -1,7 +1,10 @@
 use std::fmt::Display;
 
+use GameCoreError::*;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum GameCoreError {
+    Custom(String),
     QuestionBlanksAndNumAnswersMismatch {
         num_blanks: usize,
         num_answers: usize,
@@ -42,7 +45,10 @@ pub enum GameCoreError {
 impl Display for GameCoreError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let msg = match self {
-            GameCoreError::QuestionBlanksAndNumAnswersMismatch {
+            Custom(msg) => {
+                format!("(custom) {}", msg)
+            }
+            QuestionBlanksAndNumAnswersMismatch {
                 num_blanks,
                 num_answers,
             } => {
@@ -51,7 +57,7 @@ impl Display for GameCoreError {
                     num_blanks, num_answers
                 )
             }
-            GameCoreError::PlayerChoosingCardOutOfHandBound {
+            PlayerChoosingCardOutOfHandBound {
                 chosen_ind,
                 hand_bound,
             } => {
@@ -60,16 +66,16 @@ impl Display for GameCoreError {
                     chosen_ind, hand_bound
                 )
             }
-            GameCoreError::PlayerChoosingTheSameCardMultipleTimes { chosen_ind } => {
+            PlayerChoosingTheSameCardMultipleTimes { chosen_ind } => {
                 format!(
                     "Player chose the same card index ({}) multiple times.",
                     chosen_ind
                 )
             }
-            GameCoreError::PlayerAlreadyExists { name } => {
+            PlayerAlreadyExists { name } => {
                 format!("A Player with the name {} already exists.", name)
             }
-            GameCoreError::InsufficientAnswerCardsToDeal {
+            InsufficientAnswerCardsToDeal {
                 num_players,
                 each_deal,
                 num_answer_cards,
@@ -79,22 +85,22 @@ impl Display for GameCoreError {
                     each_deal, num_players, num_answer_cards
                 )
             }
-            GameCoreError::NotEnoughPlayers { num_players } => {
+            NotEnoughPlayers { num_players } => {
                 format!("There must be at least 3 players. (Now: {})", num_players)
             }
-            GameCoreError::NoQuestionCards => "There are no question cards.".to_owned(),
-            GameCoreError::NoActiveQuestionCard => "There is no active question card.".to_owned(),
-            GameCoreError::PlayerDoesNotExist { name } => {
+            NoQuestionCards => "There are no question cards.".to_owned(),
+            NoActiveQuestionCard => "There is no active question card.".to_owned(),
+            PlayerDoesNotExist { name } => {
                 format!("Player with name {} does not exist.", name)
             }
-            GameCoreError::JudgeTryingToSubmitAnswers { judge_name } => {
+            JudgeTryingToSubmitAnswers { judge_name } => {
                 format!("The Judge ({}) cannot submit answers.", judge_name)
             }
-            GameCoreError::PlayerAlreadySubmittedAnswers { player_name } => {
+            PlayerAlreadySubmittedAnswers { player_name } => {
                 format!("Player {} already submitted answers.", player_name)
             }
-            GameCoreError::GameNotStarted => "The game is not started.".to_owned(),
-            GameCoreError::GameAlreadyInProgress => "The game is already in progress.".to_owned(),
+            GameNotStarted => "The game is not started.".to_owned(),
+            GameAlreadyInProgress => "The game is already in progress.".to_owned(),
         };
 
         write!(f, "GameCoreError: {}", msg)
@@ -104,5 +110,17 @@ impl Display for GameCoreError {
 impl From<GameCoreError> for String {
     fn from(val: GameCoreError) -> Self {
         val.to_string()
+    }
+}
+
+impl From<String> for GameCoreError {
+    fn from(msg: String) -> Self {
+        Self::Custom(msg)
+    }
+}
+
+impl From<&str> for GameCoreError {
+    fn from(msg: &str) -> Self {
+        Self::Custom(msg.to_owned())
     }
 }
