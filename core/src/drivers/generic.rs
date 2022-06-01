@@ -4,15 +4,18 @@ use serde::Serialize;
 
 use crate::{
     error::GameCoreError,
-    game_state::{GameState, GameStateBuilder},
+    game_state::{self, GameState, GameStateBuilder},
 };
 
 use super::GameCoreDriver;
 
-pub struct GenericDriver {
+pub struct GenericDriverBuilder {
     game_state_builder: GameStateBuilder,
-    game_state: Option<GameState>,
+    hand_size_config: usize,
+}
 
+pub struct GenericDriver {
+    game_state: GameState,
     hand_size: usize,
 }
 
@@ -23,24 +26,22 @@ pub struct RoundInformation {
     pub player_hands: HashMap<String, Vec<String>>,
 }
 
-impl Default for GenericDriver {
+impl Default for GenericDriverBuilder {
     fn default() -> Self {
-        Self::new()
+        Self {
+            game_state_builder: Default::default(),
+            hand_size_config: 10,
+        }
     }
 }
 
-impl GenericDriver {
+impl GenericDriverBuilder {
     pub fn new() -> Self {
-        Self {
-            game_state_builder: GameStateBuilder::new(),
-            game_state: None,
-
-            hand_size: 10,
-        }
+        Default::default()
     }
 
     pub fn set_hand_size(&mut self, hand_size: usize) {
-        self.hand_size = hand_size;
+        self.hand_size_config = hand_size;
     }
 
     pub fn add_player(&mut self, player_name: impl Into<String>) -> Result<(), GameCoreError> {
@@ -71,12 +72,15 @@ impl GenericDriver {
         self.game_state_builder.remove_all_answers();
     }
 
-    fn is_game_started_guard(&self) -> Result<(), GameCoreError> {
-        if self.game_state.is_none() {
-            Err(GameCoreError::GameNotStarted)
-        } else {
-            Ok(())
-        }
+    pub fn build(&self) -> Result<GenericDriver, GameCoreError> {
+        let game_state = self.game_state_builder.build(self.hand_size_config)?;
+
+        let ordered_players = game_state.ordered_players();
+
+        Ok(GenericDriver {
+            game_state,
+            hand_size: self.hand_size_config,
+        })
     }
 }
 
@@ -86,31 +90,18 @@ impl GameCoreDriver for GenericDriver {
     type RoundStartInfo = RoundInformation;
     type RoundEndInfo = Vec<(Self::PlayerName, i32)>;
 
-    fn start_game(&mut self) -> Result<Vec<Self::PlayerName>, Self::Error> {
-        if self.game_state.is_some() {
-            return Err(GameCoreError::GameAlreadyInProgress);
-        }
-
-        let game_state = self.game_state_builder.build(self.hand_size)?;
-
-        let ordered_players = game_state.ordered_players();
-
-        self.game_state = Some(game_state);
-
-        Ok(ordered_players)
+    fn ordered_players(&self) -> Vec<Self::PlayerName> {
+        self.game_state.ordered_players()
     }
 
-    /// Only return Err() when the game is not started.
-    fn start_round(&mut self) -> Result<Self::RoundStartInfo, Self::Error> {
-        self.is_game_started_guard()?;
+    fn start_round(&mut self) -> Self::RoundStartInfo {
+        let game_state = &mut self.game_state;
 
-        let game_state = self.game_state.as_mut().unwrap();
-
-        Ok(RoundInformation {
+        RoundInformation {
             judge: game_state.next_judge(),
             question: game_state.draw_next_question_card(),
             player_hands: game_state.report_hands(),
-        })
+        }
     }
 
     /// `answer_indices` correspond to ZERO-based indices of the player's hand.
@@ -119,13 +110,9 @@ impl GameCoreDriver for GenericDriver {
         player_name: impl Into<Self::PlayerName>,
         answer_indices: impl IntoIterator<Item = impl Into<usize>>,
     ) -> Result<Option<Vec<(Self::PlayerName, String)>>, Self::Error> {
-        self.is_game_started_guard()?;
-
         let answer_indices: Vec<usize> = answer_indices.into_iter().map(Into::into).collect();
 
         self.game_state
-            .as_mut()
-            .unwrap()
             .submit_answers(&player_name.into(), &answer_indices)
     }
 
@@ -134,27 +121,14 @@ impl GameCoreDriver for GenericDriver {
         &mut self,
         chosen_player: impl Into<Self::PlayerName>,
     ) -> Result<Self::RoundEndInfo, Self::Error> {
-        self.is_game_started_guard()?;
-
         self.game_state
-            .as_mut()
-            .unwrap()
             .increment_awesome_points(&chosen_player.into())?;
 
-        Ok(self
-            .game_state
-            .as_ref()
-            .unwrap()
-            .report_awesome_point_ranking())
+        Ok(self.game_state.report_awesome_point_ranking())
     }
 
-    fn end_game(&mut self) -> Result<(), Self::Error> {
-        self.is_game_started_guard()?;
-
-        self.game_state = None;
-
-        Ok(())
-    }
+    /// No side effects.
+    fn end_game(self) {}
 }
 
 #[allow(dead_code)]
@@ -167,12 +141,12 @@ mod integration_tests {
 
     #[test]
     fn new() {
-        GenericDriver::new();
+        GenericDriverBuilder::new();
     }
 
     #[test]
     fn test_set_up_a_game() {
-        let mut driver = GenericDriver::new();
+        let mut driver = GenericDriverBuilder::new();
 
         driver.set_hand_size(6);
         driver.set_hand_size(10);
@@ -212,7 +186,7 @@ mod integration_tests {
         driver.add_new_answers(answers());
     }
 
-    fn set_up_a_game(mut driver: GenericDriver, add_players: bool) -> GenericDriver {
+    fn set_up_a_game(driver: &mut GenericDriverBuilder, add_players: bool) -> GenericDriver {
         driver.set_hand_size(10);
 
         if add_players {
@@ -225,21 +199,19 @@ mod integration_tests {
 
         driver.add_new_answers(answers());
 
-        driver
+        driver.build().unwrap()
     }
 
     #[test]
     fn test_run_a_game() {
-        run_a_game(set_up_a_game(GenericDriver::new(), true));
+        run_a_game(set_up_a_game(&mut GenericDriverBuilder::new(), true));
     }
 
-    fn run_a_game(mut driver: GenericDriver) -> GenericDriver {
-        driver.start_game().unwrap();
-
+    fn run_a_game(mut driver: GenericDriver) {
         let winning_awesome_points = 3;
         let mut black_box_votee = 1;
         loop {
-            let round_information = driver.start_round().unwrap();
+            let round_information = driver.start_round();
             let non_judge_players = find_non_judge_players(&round_information.judge);
 
             // Display round information to users
@@ -305,20 +277,19 @@ mod integration_tests {
             }
         }
 
-        driver.end_game().unwrap();
-
-        driver
+        driver.end_game();
     }
 
     #[test]
     fn test_run_multiple_times() {
-        let driver = run_a_game(set_up_a_game(GenericDriver::new(), true));
+        let mut builder = GenericDriverBuilder::new();
+        run_a_game(set_up_a_game(&mut builder, true));
 
-        let mut driver = run_a_game(set_up_a_game(driver, false));
+        run_a_game(set_up_a_game(&mut builder, false));
 
-        driver.remove_all_players();
-        let driver = run_a_game(set_up_a_game(driver, true));
-        run_a_game(set_up_a_game(driver, false));
+        builder.remove_all_players();
+        run_a_game(set_up_a_game(&mut builder, true));
+        run_a_game(set_up_a_game(&mut builder, false));
     }
 
     fn find_non_judge_players(judge_name: &String) -> Vec<String> {
