@@ -40,7 +40,7 @@ impl Player {
 
     /// `indices` are ZERO-based indices of the hand.
     pub(crate) fn play_cards_content(&self, indices: &[usize]) -> Result<Vec<String>, GameCoreError> {
-        let ind_set = self.validate_indices(indices)?;
+        self.validate_indices(indices)?;
 
         Ok(
             indices
