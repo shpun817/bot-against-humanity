@@ -110,6 +110,7 @@ impl GameCoreDriver for GenericDriver {
         })
     }
 
+    /// `answer_indices` correspond to ZERO-based indices of the player's hand.
     fn submit_answers(
         &mut self,
         player_name: impl Into<Self::PlayerName>,
