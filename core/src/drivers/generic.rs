@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    errors::GameCoreError,
+    error::GameCoreError,
     game_state::{GameState, GameStateBuilder},
 };
 

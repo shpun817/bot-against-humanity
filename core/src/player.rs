@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::{cards::AnswerCard, errors::GameCoreError};
+use crate::{cards::AnswerCard, error::GameCoreError};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Player {

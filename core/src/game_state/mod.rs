@@ -4,7 +4,7 @@ use rand::{prelude::SliceRandom, thread_rng};
 
 use crate::{
     cards::{AnswerCard, CardStorage, QuestionCard},
-    errors::GameCoreError,
+    error::GameCoreError,
     player::Player,
 };
 

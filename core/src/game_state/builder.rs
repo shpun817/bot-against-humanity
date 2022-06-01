@@ -3,7 +3,7 @@ use std::{
     iter::FromIterator,
 };
 
-use crate::{cards::CardStorage, errors::GameCoreError, player::Player};
+use crate::{cards::CardStorage, error::GameCoreError, player::Player};
 
 use super::{GameState, PlayerName};
 

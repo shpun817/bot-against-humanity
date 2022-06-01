@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use regex::Regex;
 
-use crate::errors::GameCoreError;
+use crate::error::GameCoreError;
 
 use super::card::Card;
 
