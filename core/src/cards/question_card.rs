@@ -230,10 +230,7 @@ mod tests {
     #[test]
     fn combine_with_answer_cards_fill_multiple_blanks() {
         let question_card = QuestionCard::new("I am _, and you are _.");
-        let answer_cards = vec![
-            "Your Father",
-            "Luke Skywalker",
-        ];
+        let answer_cards = vec!["Your Father", "Luke Skywalker"];
 
         let combine_result = question_card.combine_with_answers(answer_cards);
         assert_eq!(
@@ -245,11 +242,7 @@ mod tests {
     #[test]
     fn combine_with_wrong_number_of_answer_cards() {
         let question_card = QuestionCard::new("I am _, and you are _.");
-        let answer_cards = vec![
-            "Your Father",
-            "My Mother",
-            "Luke Skywalker",
-        ];
+        let answer_cards = vec!["Your Father", "My Mother", "Luke Skywalker"];
 
         let combine_result = question_card.combine_with_answers(answer_cards);
         assert_eq!(

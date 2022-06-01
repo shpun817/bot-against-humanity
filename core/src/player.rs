@@ -39,15 +39,16 @@ impl Player {
     }
 
     /// `indices` are ZERO-based indices of the hand.
-    pub(crate) fn play_cards_content(&self, indices: &[usize]) -> Result<Vec<String>, GameCoreError> {
+    pub(crate) fn play_cards_content(
+        &self,
+        indices: &[usize],
+    ) -> Result<Vec<String>, GameCoreError> {
         self.validate_indices(indices)?;
 
-        Ok(
-            indices
-                .iter()
-                .map(|&ind| self.hand[ind].content.clone())
-                .collect::<Vec<_>>()
-        )
+        Ok(indices
+            .iter()
+            .map(|&ind| self.hand[ind].content.clone())
+            .collect::<Vec<_>>())
     }
 
     /// `indices` are ZERO-based indices of the hand.
