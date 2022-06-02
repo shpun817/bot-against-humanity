@@ -67,7 +67,11 @@ fn main() {
                         println!("{} leaves the game!", color_player_name(player_name));
                     }
                 }
-                PreparationInput::SetHandSize(hand_size) => builder.set_hand_size(hand_size),
+                PreparationInput::SetHandSize(hand_size) => {
+                    if let Err(err) = builder.set_hand_size(hand_size) {
+                        error_handler(err)
+                    }
+                }
                 PreparationInput::SetWinTarget(win_target) => config.win_target = win_target,
                 PreparationInput::SetCountBaseOne => config.count_base = CountBase::OneBased,
                 PreparationInput::SetCountBaseZero => config.count_base = CountBase::ZeroBased,

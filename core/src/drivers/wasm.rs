@@ -1,3 +1,5 @@
+use std::convert::TryInto;
+
 use wasm_bindgen::prelude::*;
 
 use crate::{drivers::GameCoreDriver, error::GameCoreError};
@@ -33,8 +35,14 @@ impl WasmDriverBuilder {
     }
 
     #[wasm_bindgen(js_name = setHandSize)]
-    pub fn set_hand_size(&mut self, hand_size: usize) {
-        self.generic_driver_builder.set_hand_size(hand_size);
+    pub fn set_hand_size(&mut self, hand_size: i32) -> Result<(), Error> {
+        let hand_size = hand_size
+            .try_into()
+            .map_err(|_| "Hand size cannot be negative.")?;
+
+        self.generic_driver_builder.set_hand_size(hand_size)?;
+
+        Ok(())
     }
 
     #[wasm_bindgen(js_name = addPlayer)]

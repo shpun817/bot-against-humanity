@@ -40,6 +40,7 @@ pub enum GameCoreError {
     },
     GameNotStarted,
     GameAlreadyInProgress,
+    HandSizeCannotBeZero,
 }
 
 impl Display for GameCoreError {
@@ -101,9 +102,10 @@ impl Display for GameCoreError {
             }
             GameNotStarted => "The game is not started.".to_owned(),
             GameAlreadyInProgress => "The game is already in progress.".to_owned(),
+            HandSizeCannotBeZero => "Hand size cannot be zero.".to_owned(),
         };
 
-        write!(f, "GameCoreError: {}", msg)
+        write!(f, "{}", msg)
     }
 }
 

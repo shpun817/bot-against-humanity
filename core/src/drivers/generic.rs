@@ -39,8 +39,13 @@ impl GenericDriverBuilder {
         Default::default()
     }
 
-    pub fn set_hand_size(&mut self, hand_size: usize) {
-        self.hand_size_config = hand_size;
+    pub fn set_hand_size(&mut self, hand_size: usize) -> Result<(), GameCoreError> {
+        if hand_size == 0 {
+            Err(GameCoreError::HandSizeCannotBeZero)
+        } else {
+            self.hand_size_config = hand_size;
+            Ok(())
+        }
     }
 
     pub fn add_player(&mut self, player_name: impl Into<String>) -> Result<(), GameCoreError> {
