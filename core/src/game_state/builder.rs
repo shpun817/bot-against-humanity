@@ -91,7 +91,7 @@ where
         answers.into_iter().for_each(|a| self.add_new_answer(a));
     }
 
-    pub fn build(&self, num_cards_per_player: usize) -> Result<GameState<PN>, GameCoreError> {
+    pub fn build(&self, hand_size: usize) -> Result<GameState<PN>, GameCoreError> {
         let num_players = self.players.len();
         if num_players < 3 {
             return Err(GameCoreError::NotEnoughPlayers { num_players });
@@ -102,10 +102,10 @@ where
         }
 
         let num_answer_cards_in_storage = self.num_answer_cards_in_storage();
-        if num_players * num_cards_per_player > num_answer_cards_in_storage {
+        if num_players * hand_size > num_answer_cards_in_storage {
             return Err(GameCoreError::InsufficientAnswerCardsToDeal {
                 num_players,
-                each_deal: num_cards_per_player,
+                each_deal: hand_size,
                 num_answer_cards: num_answer_cards_in_storage,
             });
         }
@@ -122,7 +122,7 @@ where
         question_card_storage.shuffle_deck();
 
         for player in players.values_mut() {
-            for _ in 0..num_cards_per_player {
+            for _ in 0..hand_size {
                 player.add_card_to_hand(answer_card_storage.draw_card_from_deck().unwrap());
             }
         }

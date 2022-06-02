@@ -15,6 +15,8 @@ impl<C> CardStorage<C>
 where
     C: Card,
 {
+    // Used in testing
+    #[allow(dead_code)]
     pub(crate) fn new() -> Self {
         Self {
             deck: vec![],
@@ -29,6 +31,8 @@ where
         }
     }
 
+    // Used in testing
+    #[allow(dead_code)]
     pub(crate) fn num_cards_total(&self) -> usize {
         self.deck.len() + self.discard_pile.len()
     }

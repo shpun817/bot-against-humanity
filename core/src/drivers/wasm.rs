@@ -99,7 +99,7 @@ impl WasmDriverBuilder {
 impl WasmDriver {
     /// Return an array of strings (ordered all player names)
     #[wasm_bindgen(js_name = orderedPlayers)]
-    pub fn orderedPlayers(&self) -> JsValue {
+    pub fn ordered_players(&self) -> JsValue {
         let ordered_players = self.generic_driver.ordered_players();
 
         JsValue::from_serde(&ordered_players).unwrap()

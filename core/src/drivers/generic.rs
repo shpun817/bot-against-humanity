@@ -4,7 +4,7 @@ use serde::Serialize;
 
 use crate::{
     error::GameCoreError,
-    game_state::{self, GameState, GameStateBuilder},
+    game_state::{GameState, GameStateBuilder},
 };
 
 use super::GameCoreDriver;
@@ -16,7 +16,6 @@ pub struct GenericDriverBuilder {
 
 pub struct GenericDriver {
     game_state: GameState,
-    hand_size: usize,
 }
 
 #[derive(Serialize)]
@@ -75,12 +74,7 @@ impl GenericDriverBuilder {
     pub fn build(&self) -> Result<GenericDriver, GameCoreError> {
         let game_state = self.game_state_builder.build(self.hand_size_config)?;
 
-        let ordered_players = game_state.ordered_players();
-
-        Ok(GenericDriver {
-            game_state,
-            hand_size: self.hand_size_config,
-        })
+        Ok(GenericDriver { game_state })
     }
 }
 
