@@ -63,7 +63,7 @@ describe("WasmDriverBuilder", () => {
                 "Who am I?",
                 "Kill __ and eat _.",
                 "She is _.",
-            ])
+            ]),
         ).not.toThrow();
 
         expect(() => builder.clearAllQuestions()).not.toThrow();
@@ -76,7 +76,7 @@ describe("WasmDriverBuilder", () => {
                 "Jesus Christ",
                 "Mother Nature",
                 "End of the World",
-            ])
+            ]),
         ).not.toThrow();
 
         expect(() => builder.clearAllAnswers()).not.toThrow();

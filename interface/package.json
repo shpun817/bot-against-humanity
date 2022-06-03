@@ -1,19 +1,26 @@
 {
-  "name": "bot-against-humanity-interface",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/main.js",
-  "scripts": {
-    "start": "node src/main.js",
-    "test": "jest"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bot-against-humanity-core": "file:../core/pkg"
-  },
-  "devDependencies": {
-    "jest": "^28.1.0"
-  }
+    "name": "bot-against-humanity-interface",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "node .",
+        "test": "jest",
+        "deploy-commands": "node src/deploy-commands.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@discordjs/builders": "^0.13.0",
+        "@discordjs/rest": "^0.4.1",
+        "bot-against-humanity-core": "file:../core/pkg",
+        "discord-api-types": "^0.33.2",
+        "discord.js": "^13.7.0",
+        "dotenv": "^16.0.1"
+    },
+    "devDependencies": {
+        "eslint": "^8.16.0",
+        "jest": "^28.1.0"
+    }
 }

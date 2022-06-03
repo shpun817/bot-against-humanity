@@ -1,4 +1,4 @@
-const { WasmDriverBuilder, WasmDriver } = require("bot-against-humanity-core");
+const { WasmDriverBuilder } = require("bot-against-humanity-core");
 const {
     generateMockAnswers,
     generateMockPlayers,
@@ -32,7 +32,7 @@ describe("WasmDriver", () => {
         expect(players.length).toBe(NUM_PLAYERS);
 
         expect(players).toEqual(
-            expect.arrayContaining(generateMockPlayers(NUM_PLAYERS))
+            expect.arrayContaining(generateMockPlayers(NUM_PLAYERS)),
         );
     });
 
@@ -40,11 +40,11 @@ describe("WasmDriver", () => {
         const { judge, question, playerHands } = driver.startRound();
 
         expect(players).toContain(judge);
-        expect(questions).toContain(question.substring(0, 2));
+        expect(questions).toContain(question.split(" ")[0]);
 
         expect(Object.keys(playerHands).length).toBe(NUM_PLAYERS);
         expect(Object.keys(playerHands)).toEqual(
-            expect.arrayContaining(players)
+            expect.arrayContaining(players),
         );
 
         for (const hand of Object.values(playerHands)) {
@@ -57,10 +57,10 @@ describe("WasmDriver", () => {
         expect(() => driver.submitAnswers("You-Know-Who", [0])).toThrow();
         expect(() => driver.submitAnswers(nonJudgePlayers[0], [-1])).toThrow();
         expect(() =>
-            driver.submitAnswers(nonJudgePlayers[0], [HAND_SIZE])
+            driver.submitAnswers(nonJudgePlayers[0], [HAND_SIZE]),
         ).toThrow();
         expect(() =>
-            driver.submitAnswers(nonJudgePlayers[0], [0, 1])
+            driver.submitAnswers(nonJudgePlayers[0], [0, 1]),
         ).toThrow();
 
         expect(() => {
@@ -81,7 +81,7 @@ describe("WasmDriver", () => {
         expect(() => {
             const submitResult = driver.submitAnswers(
                 nonJudgePlayers[nonJudgePlayers.length - 1],
-                [0]
+                [0],
             );
             expect(submitResult).not.toBeNull();
             expect(submitResult.length).toBe(nonJudgePlayers.length);
