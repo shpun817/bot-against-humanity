@@ -19,6 +19,7 @@ pub struct GenericDriver {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RoundInformation {
     pub judge: String,
     pub question: String,
