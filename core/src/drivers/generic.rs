@@ -148,8 +148,8 @@ mod integration_tests {
     fn test_set_up_a_game() {
         let mut driver = GenericDriverBuilder::new();
 
-        driver.set_hand_size(6);
-        driver.set_hand_size(10);
+        driver.set_hand_size(6).unwrap();
+        driver.set_hand_size(10).unwrap();
 
         for player in players() {
             assert!(
@@ -187,7 +187,7 @@ mod integration_tests {
     }
 
     fn set_up_a_game(driver: &mut GenericDriverBuilder, add_players: bool) -> GenericDriver {
-        driver.set_hand_size(10);
+        driver.set_hand_size(10).unwrap();
 
         if add_players {
             for player in players() {
