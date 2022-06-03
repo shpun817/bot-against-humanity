@@ -138,6 +138,10 @@ where
     }
 
     pub fn increment_awesome_points(&mut self, player_name: &PN) -> Result<i32, GameCoreError> {
+        if *player_name == self.current_judge_name() {
+            return Err(GameCoreError::JudgeCannotBeChosen);
+        }
+
         if let Some(player) = self.players.get_mut(player_name) {
             Ok(player.increment_awesome_points())
         } else {
@@ -444,24 +448,25 @@ mod tests {
     #[test]
     fn increment_awesome_points() {
         let mut game_state = get_built_game_state();
+        let judge = game_state.current_judge_name();
+        let non_judge = if judge == "A" {
+            "B"
+        } else {
+            {
+                "A"
+            }
+        };
 
         assert_eq!(
             game_state
-                .increment_awesome_points(&"A".to_owned())
+                .increment_awesome_points(&non_judge.to_owned())
                 .ok()
                 .unwrap(),
             1
         );
         assert_eq!(
             game_state
-                .increment_awesome_points(&"B".to_owned())
-                .ok()
-                .unwrap(),
-            1
-        );
-        assert_eq!(
-            game_state
-                .increment_awesome_points(&"A".to_owned())
+                .increment_awesome_points(&non_judge.to_owned())
                 .ok()
                 .unwrap(),
             2
@@ -481,17 +486,29 @@ mod tests {
     }
 
     #[test]
+    fn increment_awesome_points_judge() {
+        let mut game_state = get_built_game_state();
+
+        assert_eq!(
+            game_state.increment_awesome_points(&game_state.current_judge_name()),
+            Err(GameCoreError::JudgeCannotBeChosen)
+        )
+    }
+
+    #[test]
     fn report_awesome_point_ranking() {
         let mut game_state = get_built_game_state();
+        let judge = game_state.current_judge_name();
+        let non_judge = if judge == "A" { "B" } else { "A" };
         game_state
-            .increment_awesome_points(&"A".to_owned())
+            .increment_awesome_points(&non_judge.to_owned())
             .ok()
             .unwrap();
 
         let awesome_point_ranking = game_state.report_awesome_point_ranking();
 
         assert_eq!(awesome_point_ranking.len(), game_state.num_players);
-        assert_eq!(awesome_point_ranking[0], ("A".to_owned(), 1));
+        assert_eq!(awesome_point_ranking[0], (non_judge.to_owned(), 1));
         assert_eq!(awesome_point_ranking[1].1, 0);
         assert_eq!(awesome_point_ranking[2].1, 0);
     }
