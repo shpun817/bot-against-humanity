@@ -2,7 +2,7 @@ const { WasmDriverBuilder } = require("bot-against-humanity-core");
 const { LogDisplayError } = require("./error");
 
 const errors = {
-    unregisteredDisplayName: (userId) =>
+    noRegisteredUsername: (userId) =>
         new Error(
             `The display name of the user with id ${userId} is not registered.`,
         ),
@@ -32,19 +32,19 @@ class GameInstanceManager {
     constructor() {
         this.ownerIdToBuilder = new Map();
         this.channelIdToDriver = new Map();
-        this.userIdToDisplayName = new Map();
+        this.userIdToUsername = new Map();
     }
 
-    registerUserDisplayName(userId, displayName) {
-        this.userIdToDisplayName.set(userId, displayName);
+    registerUsername(userId, displayName) {
+        this.userIdToUsername.set(userId, displayName);
     }
 
-    getUserDisplayName(userId) {
-        if (!this.userIdToDisplayName.has(userId)) {
-            throw errors.unregisteredDisplayName(userId);
+    getUsername(userId) {
+        if (!this.userIdToUsername.has(userId)) {
+            throw errors.noRegisteredUsername(userId);
         }
 
-        return this.userIdToDisplayName.get(userId);
+        return this.userIdToUsername.get(userId);
     }
 
     createBuilder(ownerId) {
