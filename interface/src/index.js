@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, Intents } = require("discord.js");
 const { BOT_TOKEN: token } = process.env;
+const GameInstanceManager = require("./game_instance_manager");
 
 const client = new Client({
     intents: [Intents.FLAGS.GUILDS],
@@ -17,6 +18,8 @@ fs.readdirSync(commandsPath).forEach((file) => {
     const command = require(filePath);
     client.commands.set(command.data.name, command);
 });
+
+client.gameInstanceManager = new GameInstanceManager();
 
 client.once("ready", () => {
     console.log("Ready!");
