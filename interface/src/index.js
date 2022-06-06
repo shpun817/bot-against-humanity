@@ -9,6 +9,14 @@ const { LogDisplayError } = require("./error");
 const client = new Client({
     intents: [Intents.FLAGS.GUILDS],
 });
+
+client.gameInstanceManager = new GameInstanceManager();
+
+client.once("ready", () => {
+    console.log("Ready!");
+});
+
+// Listen for commands
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, "commands");
 fs.readdirSync(commandsPath).forEach((file) => {
@@ -19,14 +27,6 @@ fs.readdirSync(commandsPath).forEach((file) => {
     const command = require(filePath);
     client.commands.set(command.data.name, command);
 });
-
-client.gameInstanceManager = new GameInstanceManager();
-
-client.once("ready", () => {
-    console.log("Ready!");
-});
-
-// Listen for commands
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
 
@@ -61,12 +61,32 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 // Listen for button interactions
+client.buttons = new Collection();
+const buttonsPath = path.join(__dirname, "buttons");
+fs.readdirSync(buttonsPath).forEach((file) => {
+    if (!file.endsWith(".js")) {
+        return;
+    }
+    const filePath = path.join(buttonsPath, file);
+    const button = require(filePath);
+    client.buttons.set(button.name, button);
+});
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isButton()) return;
 
-    await interaction.reply({
-        content: "Button is pressed!",
-    });
+    const buttonName = interaction.customId.split("_")[0];
+    const buttons = interaction.client.buttons;
+
+    if (!buttons.has(buttonName)) {
+        console.error(`${interaction.user.tag} triggered an unknown button interaction with customId ${interaction.customId}`);
+        await interaction.reply({
+            content: "Oops, you've pressed an unknown button!",
+            ephemeral: true,
+        });
+        return;
+    }
+
+    buttons.get(buttonName).handle(interaction);
 });
 
 client.login(token);
