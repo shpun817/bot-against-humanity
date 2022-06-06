@@ -4,6 +4,7 @@ const path = require("node:path");
 const { Client, Collection, Intents } = require("discord.js");
 const { BOT_TOKEN: token } = process.env;
 const GameInstanceManager = require("./game_instance_manager");
+const { LogDisplayError } = require("./error");
 
 const client = new Client({
     intents: [Intents.FLAGS.GUILDS],
@@ -43,11 +44,19 @@ client.on("interactionCreate", async (interaction) => {
     try {
         await command.execute(interaction);
     } catch (error) {
-        console.error(error);
-        await interaction.reply({
-            content: "There was an error while executing this command!",
-            ephemeral: true,
-        });
+        if (error instanceof LogDisplayError) {
+            console.error(error);
+            await interaction.reply({
+                content: error.displayMsg,
+                ephemeral: true,
+            });
+        } else if (error instanceof Error) {
+            console.error(error);
+            await interaction.reply({
+                content: "There was an error executing the command!",
+                ephemeral: true,
+            });
+        }
     }
 });
 
