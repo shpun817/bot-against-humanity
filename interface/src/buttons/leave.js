@@ -1,9 +1,9 @@
 const { createPrepareMsgOptions } = require("../commands/prepare");
 
 module.exports = {
-    name: "join",
+    name: "leave",
     async handle(interaction) {
-        // Format: join_<ownerId>
+        // Format: leave_<ownerId>
         const buttonId = interaction.customId;
         const ownerId = buttonId.split("_")[1];
 
@@ -15,22 +15,22 @@ module.exports = {
         const metadata =
             interaction.client.gameInstanceManager.getBuilderMetadata(ownerId);
 
-        if (metadata.playerMentions.includes(userMention)) {
+        if (!metadata.playerMentions.includes(userMention)) {
             await interaction.reply({
-                content: "You have already joined this game!",
+                content: "You are not in this game!",
                 ephemeral: true,
             });
             return;
         }
 
-        builder.addPlayer(userMention);
+        builder.removePlayer(userMention);
 
         await interaction.reply({
-            content: "Joined successfully!",
+            content: "Left successfully!",
             ephemeral: true,
         });
 
-        metadata.playerMentions.push(userMention);
+        metadata.playerMentions = metadata.playerMentions.filter((p) => p !== userMention);
         await metadata.prepareInteraction.editReply(
             createPrepareMsgOptions(ownerId, metadata.playerMentions),
         );

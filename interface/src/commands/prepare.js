@@ -40,7 +40,9 @@ module.exports = {
         builder.addNewAnswers(AssetLoader.LoadAnswersJson("default"));
 
         metadata.playerMentions = [ownerMention];
-        metadata.prepareMsg = await interaction.reply(
+        metadata.prepareInteraction = interaction;
+
+        await interaction.reply(
             createPrepareMsgOptions(ownerId, metadata.playerMentions),
         );
     },
