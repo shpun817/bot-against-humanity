@@ -53,7 +53,7 @@ client.on("interactionCreate", async (interaction) => {
         } else if (error instanceof Error) {
             console.error(error);
             await interaction.reply({
-                content: "There was an error executing the command!",
+                content: `Error: ${error.message}`,
                 ephemeral: true,
             });
         }
@@ -86,7 +86,23 @@ client.on("interactionCreate", async (interaction) => {
         return;
     }
 
-    buttons.get(buttonName).handle(interaction);
+    try {
+        buttons.get(buttonName).handle(interaction);
+    } catch (error) {
+        if (error instanceof LogDisplayError) {
+            console.error(error);
+            await interaction.reply({
+                content: error.displayMsg,
+                ephemeral: true,
+            });
+        } else if (error instanceof Error) {
+            console.error(error);
+            await interaction.reply({
+                content: `Error: ${error.message}`,
+                ephemeral: true,
+            });
+        }
+    }
 });
 
 client.login(token);
