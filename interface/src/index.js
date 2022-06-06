@@ -7,26 +7,26 @@ const GameInstanceManager = require("./game_instance_manager");
 const { LogDisplayError } = require("./error");
 
 async function handleError(error, interaction) {
+    const options = { content: "Error", ephemeral: true };
+
     if (error instanceof LogDisplayError) {
         console.error(error);
-        await interaction.reply({
-            content: error.displayMsg,
-            ephemeral: true,
-        });
+        options.content = error.displayMsg;
     } else if (error instanceof Error) {
         console.error(error);
-        await interaction.reply({
-            content: `Error: ${error.message}`,
-            ephemeral: true,
-        });
+        options.content = `Error: ${error.message}`;
     } else if (typeof error === "string") {
         console.error(error);
-        await interaction.reply({
-            content: error,
-            ephemeral: true,
-        });
+        options.content = error;
     } else {
         console.error(error);
+        options.content = "Unknown error!";
+    }
+
+    try {
+        await interaction.reply(options);
+    } catch (_) {
+        await interaction.editReply(options);
     }
 }
 
