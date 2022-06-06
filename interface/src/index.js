@@ -6,6 +6,22 @@ const { BOT_TOKEN: token } = process.env;
 const GameInstanceManager = require("./game_instance_manager");
 const { LogDisplayError } = require("./error");
 
+async function handleError(error, interaction) {
+    if (error instanceof LogDisplayError) {
+        console.error(error);
+        await interaction.reply({
+            content: error.displayMsg,
+            ephemeral: true,
+        });
+    } else if (error instanceof Error) {
+        console.error(error);
+        await interaction.reply({
+            content: `Error: ${error.message}`,
+            ephemeral: true,
+        });
+    }
+}
+
 const client = new Client({
     intents: [Intents.FLAGS.GUILDS],
 });
@@ -78,7 +94,9 @@ client.on("interactionCreate", async (interaction) => {
     const buttons = interaction.client.buttons;
 
     if (!buttons.has(buttonName)) {
-        console.error(`${interaction.user.tag} triggered an unknown button interaction with customId ${interaction.customId}`);
+        console.error(
+            `${interaction.user.tag} triggered an unknown button interaction with customId ${interaction.customId}`,
+        );
         await interaction.reply({
             content: "Oops, you've pressed an unknown button!",
             ephemeral: true,
@@ -89,19 +107,7 @@ client.on("interactionCreate", async (interaction) => {
     try {
         await buttons.get(buttonName).handle(interaction);
     } catch (error) {
-        if (error instanceof LogDisplayError) {
-            console.error(error);
-            await interaction.reply({
-                content: error.displayMsg,
-                ephemeral: true,
-            });
-        } else if (error instanceof Error) {
-            console.error(error);
-            await interaction.reply({
-                content: `Error: ${error.message}`,
-                ephemeral: true,
-            });
-        }
+        await handleError(error, interaction);
     }
 });
 
