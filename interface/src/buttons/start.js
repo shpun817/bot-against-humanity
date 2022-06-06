@@ -1,7 +1,9 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
 
 function formatPlayers(players, judge) {
-    let content = "Take turns to be the **Judge**!\n";
+    let content = "===================================\n";
+
+    content += `Who is the **Judge** this turn? ${judge}!!\n`;
 
     for (const player of players) {
         content += judge === player ? `🧑‍⚖️ ${player} 👩‍⚖️` : player;
@@ -95,4 +97,5 @@ module.exports = {
 
         await startRound(driver, thread, driverMetadata);
     },
+    startRound,
 };
