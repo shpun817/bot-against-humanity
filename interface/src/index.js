@@ -107,4 +107,16 @@ client.on("interactionCreate", async (interaction) => {
     }
 });
 
+// Clean up game instances in deleted threads
+function cleanUpOnChannelDelete(channel) {
+    try {
+        client.gameInstanceManager.removeDriver(channel.id);
+        console.log(`Game instance in channel ${channel.name} deleted.`);
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+client.on("channelDelete", cleanUpOnChannelDelete);
+client.on("threadDelete", cleanUpOnChannelDelete);
+
 client.login(token);
