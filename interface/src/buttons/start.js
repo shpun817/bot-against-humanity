@@ -38,11 +38,12 @@ async function startRound(driver, channel, metadata) {
 
     await channel.send(formatPlayers(players, judge));
 
-    await channel.send(formatQuestion(question));
+    const roundStartMessage = await channel.send(formatQuestion(question));
 
     metadata.judge = judge;
     metadata.playerHands = playerHands;
     metadata.playerSelections = {};
+    metadata.roundStartMessage = roundStartMessage;
     metadata.playerHandInteractions = {};
     metadata.playerAnswerInteractions = {};
     metadata.playerSubmitInteractions = {};

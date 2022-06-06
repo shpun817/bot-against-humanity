@@ -87,6 +87,8 @@ module.exports = {
         await interaction.reply(option);
 
         if (submitResult !== null) {
+            await metadata.roundStartMessage.edit({ components: [] });
+
             await interaction.channel.send(
                 "All players have submitted their answers!",
             );
