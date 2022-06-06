@@ -6,7 +6,7 @@ function createDisplaySubmissionMessageOptions(
     enableNext,
     enableChoose,
 ) {
-    const content = `❓: **${submitResult[0][1]}**`;
+    const content = `❓: **${submitResult[i][1]}**`;
     const components = [
         new MessageActionRow().addComponents(
             new MessageButton()
