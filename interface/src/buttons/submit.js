@@ -1,20 +1,28 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
 
-function createDisplaySubmissionMessageComponents(enableNext, enableChoose) {
-    return [
+function createDisplaySubmissionMessageOptions(
+    submitResult,
+    i,
+    enableNext,
+    enableChoose,
+) {
+    const content = `❓: **${submitResult[0][1]}**`;
+    const components = [
         new MessageActionRow().addComponents(
             new MessageButton()
-                .setCustomId("next_0")
+                .setCustomId(`next_${i}`)
                 .setLabel("Next")
                 .setStyle("PRIMARY")
                 .setDisabled(!enableNext),
             new MessageButton()
-                .setCustomId("choose_0")
+                .setCustomId(`choose_${i}`)
                 .setLabel("Choose")
                 .setStyle("SUCCESS")
                 .setDisabled(!enableChoose),
         ),
     ];
+
+    return { content, components };
 }
 
 module.exports = {
@@ -35,48 +43,69 @@ module.exports = {
         if (!(userMention in metadata.playerSubmitInteractions)) {
             metadata.playerSubmitInteractions[userMention] = interaction;
         }
+        const submitInteraction =
+            metadata.playerSubmitInteractions[userMention];
 
         const currentSelectionIndices = metadata.playerSelections[userMention];
 
-        const option = {
-            content: `${userMention} is ready!`,
-            ephemeral: false,
-        };
-
+        let submitResult;
         try {
-            const submitResult = await driver.submitAnswers(
+            submitResult = await driver.submitAnswers(
                 userMention,
                 currentSelectionIndices,
             );
-
-            if (submitResult !== null) {
-                await interaction.reply(option);
-                await interaction.channel.send(
-                    "All players have submitted their answers!",
-                );
-
-                metadata.submitResult = submitResult;
-
-                const displaySubmissionMessage = await interaction.channel.send(
-                    {
-                        content: `**${submitResult[0][1]}**`,
-                        components: createDisplaySubmissionMessageComponents(
-                            true,
-                            false,
-                        ),
-                    },
-                );
-
-                metadata.submitResult[0].push(displaySubmissionMessage);
-
-                return;
-            }
         } catch (error) {
-            option.content = error;
-            option.ephemeral = true;
+            const option = {
+                content: error,
+                ephemeral: true,
+            };
+
+            try {
+                await submitInteraction.reply(option);
+            } catch (_) {
+                await submitInteraction.editReply(option);
+            }
+
+            return;
         }
 
+        // The hand and answer interactions must have been assigned before the submit window showed up.
+        const handInteraction = metadata.playerHandInteractions[userMention];
+        await handInteraction.editReply({
+            content: "Thanks for submitting your answers!",
+            components: [],
+        });
+        const answerInteraction =
+            metadata.playerAnswerInteractions[userMention];
+        await answerInteraction.editReply({
+            components: [],
+        });
+
+        const option = {
+            content: `${userMention} is ready!`,
+        };
         await interaction.reply(option);
+
+        if (submitResult !== null) {
+            await interaction.channel.send(
+                "All players have submitted their answers!",
+            );
+
+            metadata.submitResult = submitResult;
+
+            const displaySubmissionMessage = await interaction.channel.send(
+                createDisplaySubmissionMessageOptions(
+                    metadata.submitResult,
+                    0,
+                    true,
+                    false,
+                ),
+            );
+
+            metadata.submitResult[0].push(displaySubmissionMessage);
+
+            return;
+        }
     },
-    createDisplaySubmissionMessageComponents,
+    createDisplaySubmissionMessageOptions,
 };
