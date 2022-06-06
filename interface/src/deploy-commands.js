@@ -9,6 +9,10 @@ const {
     BOT_TOKEN: token,
 } = process.env;
 
+function sleep(ms) {
+    return new Promise((_) => setTimeout(_, ms));
+}
+
 const commandsPath = path.join(__dirname, "commands");
 
 const commands = fs
@@ -22,11 +26,22 @@ const commands = fs
 
 const rest = new REST({ version: "9" }).setToken(token);
 
+const isGlobal = process.argv[2] === "global";
+
+const route = isGlobal
+    ? Routes.applicationCommands(clientId)
+    : Routes.applicationGuildCommands(clientId, guildId);
 (async () => {
     try {
+        if (isGlobal) {
+            console.log("Warning: about to update global application commands!");
+            console.log("Waiting 5 seconds...");
+            await sleep(5000);
+        }
+
         console.log("Started refreshing application (/) commands.");
 
-        await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+        await rest.put(route, {
             body: commands,
         });
 
