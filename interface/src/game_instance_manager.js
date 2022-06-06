@@ -32,13 +32,6 @@ const errors = {
         ),
 };
 
-class BuilderAgent {
-    constructor() {
-        this.builder = new WasmDriverBuilder();
-        this.metadata = {};
-    }
-}
-
 class GameInstanceManager {
     constructor() {
         this.ownerIdToBuilder = new Map();
@@ -51,7 +44,10 @@ class GameInstanceManager {
             throw errors.gameInstanceAlreadyBeingBuilt();
         }
 
-        this.ownerIdToBuilder.set(ownerId, new BuilderAgent());
+        this.ownerIdToBuilder.set(ownerId, {
+            builder: new WasmDriverBuilder(),
+            metadata: {},
+        });
         return this.ownerIdToBuilder.get(ownerId).builder;
     }
 
