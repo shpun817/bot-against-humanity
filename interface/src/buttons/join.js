@@ -10,8 +10,10 @@ module.exports = {
         const user = interaction.user;
         const userMention = user.toString();
 
-        const builder = interaction.client.gameInstanceManager.getBuilder(ownerId);
-        const metadata = interaction.client.gameInstanceManager.getBuilderMetadata(ownerId);
+        const builder =
+            interaction.client.gameInstanceManager.getBuilder(ownerId);
+        const metadata =
+            interaction.client.gameInstanceManager.getBuilderMetadata(ownerId);
 
         if (metadata.playerMentions.includes(userMention)) {
             await interaction.reply({
@@ -24,6 +26,8 @@ module.exports = {
         builder.addPlayer(userMention);
 
         metadata.playerMentions.push(userMention);
-        await metadata.prepareMsg.edit(createPrepareMsgOptions(ownerId, metadata.playerMentions));
+        await metadata.prepareMsg.edit(
+            createPrepareMsgOptions(ownerId, metadata.playerMentions),
+        );
     },
 };
