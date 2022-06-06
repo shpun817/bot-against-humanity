@@ -11,7 +11,7 @@ function formatRank(rank) {
         case 1:
             return "🏆";
         default:
-            return rank;
+            return "";
     }
 }
 
@@ -46,9 +46,14 @@ module.exports = {
 
         const ranking = driver.endRound(chosenPlayerMention);
 
+        await interaction.reply(`${chosenPlayerMention}, you are chosen!!`);
+
+        const topScore = ranking[0][1];
+
         let rankingString = "";
         let lastScore = Infinity;
         let rank = 0;
+        const topPlayers = [];
 
         for (const [playerMention, score] of ranking) {
             if (score < lastScore) {
@@ -56,10 +61,39 @@ module.exports = {
                 rank += 1;
             }
 
-            rankingString += `${formatRank(rank)} ${playerMention}\n`;
+            if (rank === 1) {
+                topPlayers.push(playerMention);
+            }
+
+            rankingString += `${formatRank(rank)} ${playerMention} - **${score}**\n`;
         }
 
-        await interaction.reply(rankingString);
+        await channel.send(rankingString);
+
+        if (topScore >= metadata.winTarget) {
+            const roundEndContent = `🎂🎉 ${topPlayers[0]} has won a ticket to hell!!! 🍾🎊`;
+
+            await channel.send(roundEndContent);
+            return;
+        } else {
+            let roundEndContent = `🔥 ${topPlayers[0]} is leading!! 🔥`;
+            if (topPlayers.length > 1) {
+                roundEndContent = `🔥🔥 ${topPlayers.reduce(
+                    (acc, p, i, arr) => {
+                        acc += p;
+                        if (i < arr.length - 2) {
+                            acc += ", ";
+                        } else if (i === arr.length - 2) {
+                            acc += " and ";
+                        }
+                        return acc;
+                    },
+                    "",
+                )} are leading!! 🔥🔥`;
+            }
+
+            await interaction.followUp(roundEndContent);
+        }
 
         await sleep(3000);
 
