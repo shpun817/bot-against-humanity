@@ -46,7 +46,7 @@ class GameInstanceManager {
 
         this.ownerIdToBuilder.set(ownerId, {
             builder: new WasmDriverBuilder(),
-            metadata: {},
+            metadata: { winTarget: 5 },
         });
         return this.ownerIdToBuilder.get(ownerId).builder;
     }
@@ -75,23 +75,25 @@ class GameInstanceManager {
         this.ownerIdToBuilder.delete(ownerId);
     }
 
-    buildDriver(ownerId) {
+    buildDriver(ownerId, channelId) {
         if (!this.ownerIdToBuilder.has(ownerId)) {
             throw errors.noGameInstanceBeingBuilt();
         }
 
-        const driver = this.getBuilder(ownerId).build();
-        this.ownerIdToBuilder.delete(ownerId);
-
-        return driver;
-    }
-
-    insertDriver(channelId, driver) {
         if (this.channelIdToDriver.has(channelId)) {
             throw errors.threadAlreadyHasGameInstance();
         }
 
-        this.channelIdToDriver.set(channelId, { driver, metadata: {} });
+        const builderMetadata = this.getBuilderMetadata(ownerId);
+        const driver = this.getBuilder(ownerId).build();
+        this.ownerIdToBuilder.delete(ownerId);
+
+        this.channelIdToDriver.set(channelId, {
+            driver,
+            metadata: { winTarget: builderMetadata.winTarget },
+        });
+
+        return driver;
     }
 
     getDriver(channelId) {

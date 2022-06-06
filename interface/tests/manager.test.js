@@ -92,7 +92,6 @@ describe("GameInstanceManager", () => {
 
         test("can get a driver.", () => {
             const driver1 = gameInstanceManager.buildDriver("A", "channelA");
-            gameInstanceManager.insertDriver("channelA", driver1);
             const driver2 = gameInstanceManager.getDriver("channelA");
 
             expect(driver1).toBe(driver2);
@@ -104,7 +103,6 @@ describe("GameInstanceManager", () => {
 
         test("can remove a driver", () => {
             const driver = gameInstanceManager.buildDriver("A", "channelA");
-            gameInstanceManager.insertDriver("channelA", driver);
 
             expect(() =>
                 gameInstanceManager.removeDriver("channelA"),
