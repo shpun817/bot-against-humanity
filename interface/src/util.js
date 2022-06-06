@@ -14,9 +14,9 @@ function formatPlayers(players, judge) {
 function formatQuestion(judge, question) {
     let content = "===================================\n";
 
-    content += `Show ${judge} what you got:\n\n`;
+    content += "Question:\n\n";
 
-    content += `**${question.replaceAll("_", "\\_")}**`;
+    content += `**${question.replaceAll("_", "❓")}**`;
 
     const components = [
         new MessageActionRow().addComponents(
