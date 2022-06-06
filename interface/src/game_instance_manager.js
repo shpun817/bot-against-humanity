@@ -75,21 +75,23 @@ class GameInstanceManager {
         this.ownerIdToBuilder.delete(ownerId);
     }
 
-    buildDriver(ownerId, channelId) {
+    buildDriver(ownerId) {
         if (!this.ownerIdToBuilder.has(ownerId)) {
             throw errors.noGameInstanceBeingBuilt();
-        }
-
-        if (this.channelIdToDriver.has(channelId)) {
-            throw errors.threadAlreadyHasGameInstance();
         }
 
         const driver = this.getBuilder(ownerId).build();
         this.ownerIdToBuilder.delete(ownerId);
 
-        this.channelIdToDriver.set(channelId, driver);
-
         return driver;
+    }
+
+    insertDriver(channelId, driver) {
+        if (this.channelIdToDriver.has(channelId)) {
+            throw errors.threadAlreadyHasGameInstance();
+        }
+
+        this.channelIdToDriver.set(channelId, driver);
     }
 
     getDriver(channelId) {

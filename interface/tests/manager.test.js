@@ -45,7 +45,6 @@ describe("GameInstanceManager", () => {
         expect(() => gameInstanceManager.removeBuilder("A")).not.toThrow();
         expect(() => gameInstanceManager.getBuilder("A")).toThrow();
     });
-    
 
     test("can create a different builder for different owners.", () => {
         const builderA = gameInstanceManager.createBuilder("A");
@@ -85,10 +84,11 @@ describe("GameInstanceManager", () => {
         });
 
         test("can get a driver.", () => {
-            gameInstanceManager.buildDriver("A", "channelA");
-            const driver = gameInstanceManager.getDriver("channelA");
+            const driver1 = gameInstanceManager.buildDriver("A", "channelA");
+            gameInstanceManager.insertDriver("channelA", driver1);
+            const driver2 = gameInstanceManager.getDriver("channelA");
 
-            expect(driver).toBeInstanceOf(WasmDriver);
+            expect(driver1).toBe(driver2);
         });
 
         test("cannot get a driver before building it.", () => {
@@ -96,7 +96,8 @@ describe("GameInstanceManager", () => {
         });
 
         test("can remove a driver", () => {
-            gameInstanceManager.buildDriver("A", "channelA");
+            const driver = gameInstanceManager.buildDriver("A", "channelA");
+            gameInstanceManager.insertDriver("channelA", driver);
 
             expect(() =>
                 gameInstanceManager.removeDriver("channelA"),
