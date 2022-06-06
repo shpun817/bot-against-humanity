@@ -4,10 +4,7 @@ function formatPlayers(players, judge) {
     let content = "Take turns to be the Judge!\n";
 
     for (const player of players) {
-        content += player;
-        if (judge === player) {
-            content += " 👩‍⚖️";
-        }
+        content += judge === player ? `🧑‍⚖️ ${player} 👩‍⚖️` : player;
         content += "\n";
     }
 
