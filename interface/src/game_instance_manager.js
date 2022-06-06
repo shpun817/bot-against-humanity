@@ -26,12 +26,17 @@ const errors = {
             "There is no running game instance in this channel!",
             `Channel with id ${channelId} does not have a running game instance.`,
         ),
+    noSubmittedAnswers: (channelId) =>
+        new Error(
+            `Channel with id ${channelId} does not have any submitted answers.`,
+        ),
 };
 
 class GameInstanceManager {
     constructor() {
         this.ownerIdToBuilder = new Map();
         this.channelIdToDriver = new Map();
+        this.channelIdToSubmittedAnswers = new Map();
         this.userIdToUsername = new Map();
     }
 
@@ -95,6 +100,26 @@ class GameInstanceManager {
         }
 
         this.channelIdToDriver.delete(channelId);
+    }
+
+    setSubmittedAnswers(channelId, answers) {
+        this.channelIdToSubmittedAnswers.set(channelId, answers);
+    }
+
+    getSubmittedAnswers(channelId) {
+        if (!this.channelIdToSubmittedAnswers.has(channelId)) {
+            throw errors.noSubmittedAnswers(channelId);
+        }
+
+        return this.channelIdToSubmittedAnswers.get(channelId);
+    }
+
+    removeSubmittedAnswers(channelId) {
+        if (!this.channelIdToSubmittedAnswers.has(channelId)) {
+            throw errors.noSubmittedAnswers(channelId);
+        }
+
+        this.channelIdToSubmittedAnswers.delete(channelId);
     }
 }
 
