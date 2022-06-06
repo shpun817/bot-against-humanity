@@ -96,7 +96,7 @@ module.exports = {
         const driverMetadata =
             interaction.client.gameInstanceManager.getDriverMetadata(thread.id);
 
-        await thread.send(`Get to ${driverMetadata.winTarget} Awesome Points before anyone else!!`);
+        await thread.send(`Get to **${driverMetadata.winTarget} Awesome Points** before anyone else!!`);
         await startRound(driver, thread, driverMetadata);
     },
     startRound,
