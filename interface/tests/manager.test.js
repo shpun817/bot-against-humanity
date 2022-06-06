@@ -53,6 +53,13 @@ describe("GameInstanceManager", () => {
         expect(builderA).not.toBe(builderB); // Different objects
     });
 
+    test("cannot build a driver before the requirements are met.", () => {
+        gameInstanceManager.createBuilder("A");
+
+        expect(() => gameInstanceManager.buildDriver("A")).toThrow();
+    });
+    
+
     describe("driver interactions", () => {
         beforeEach(() => {
             gameInstanceManager = new GameInstanceManager();

@@ -19,6 +19,14 @@ async function handleError(error, interaction) {
             content: `Error: ${error.message}`,
             ephemeral: true,
         });
+    } else if (typeof error === "string") {
+        console.error(error);
+        await interaction.reply({
+            content: error,
+            ephemeral: true,
+        });
+    } else {
+        console.error(error);
     }
 }
 
@@ -60,19 +68,7 @@ client.on("interactionCreate", async (interaction) => {
     try {
         await command.execute(interaction);
     } catch (error) {
-        if (error instanceof LogDisplayError) {
-            console.error(error);
-            await interaction.reply({
-                content: error.displayMsg,
-                ephemeral: true,
-            });
-        } else if (error instanceof Error) {
-            console.error(error);
-            await interaction.reply({
-                content: `Error: ${error.message}`,
-                ephemeral: true,
-            });
-        }
+        await handleError(error, interaction);
     }
 });
 
