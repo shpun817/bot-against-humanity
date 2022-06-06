@@ -115,48 +115,4 @@ describe("GameInstanceManager", () => {
             ).toThrow();
         });
     });
-
-    describe("submitting answers", () => {
-        beforeEach(() => {
-            gameInstanceManager = new GameInstanceManager();
-        });
-
-        test("can set submitted answers.", () => {
-            gameInstanceManager.setSubmittedAnswers("channelA", [
-                ["A", "I want to be Batman."],
-            ]);
-        });
-
-        test("can get submitted answers.", () => {
-            gameInstanceManager.setSubmittedAnswers("channelA", [
-                ["A", "I want to be Batman."],
-            ]);
-
-            expect(gameInstanceManager.getSubmittedAnswers("channelA")).toEqual(
-                [["A", "I want to be Batman."]],
-            );
-        });
-
-        test("cannot get submitted answers before setting it.", () => {
-            expect(() =>
-                gameInstanceManager.getSubmittedAnswers("channelA"),
-            ).toThrow();
-        });
-
-        test("can remove submitted answers.", () => {
-            gameInstanceManager.setSubmittedAnswers("channelA", [
-                ["A", "I want to be Batman."],
-            ]);
-
-            expect(() =>
-                gameInstanceManager.removeSubmittedAnswers("channelA"),
-            ).not.toThrow();
-        });
-
-        test("cannot remove submitted answers before setting it.", () => {
-            expect(() =>
-                gameInstanceManager.removeSubmittedAnswers("channelA"),
-            ).toThrow();
-        });
-    });
 });

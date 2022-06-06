@@ -119,26 +119,6 @@ class GameInstanceManager {
 
         this.channelIdToDriver.delete(channelId);
     }
-
-    setSubmittedAnswers(channelId, answers) {
-        this.channelIdToSubmittedAnswers.set(channelId, answers);
-    }
-
-    getSubmittedAnswers(channelId) {
-        if (!this.channelIdToSubmittedAnswers.has(channelId)) {
-            throw errors.noSubmittedAnswers(channelId);
-        }
-
-        return this.channelIdToSubmittedAnswers.get(channelId);
-    }
-
-    removeSubmittedAnswers(channelId) {
-        if (!this.channelIdToSubmittedAnswers.has(channelId)) {
-            throw errors.noSubmittedAnswers(channelId);
-        }
-
-        this.channelIdToSubmittedAnswers.delete(channelId);
-    }
 }
 
 module.exports = GameInstanceManager;
