@@ -91,7 +91,7 @@ class GameInstanceManager {
             throw errors.threadAlreadyHasGameInstance();
         }
 
-        this.channelIdToDriver.set(channelId, driver);
+        this.channelIdToDriver.set(channelId, { driver, metadata: {} });
     }
 
     getDriver(channelId) {
@@ -99,7 +99,15 @@ class GameInstanceManager {
             throw errors.noRunningGameInstance(channelId);
         }
 
-        return this.channelIdToDriver.get(channelId);
+        return this.channelIdToDriver.get(channelId).driver;
+    }
+
+    getDriverMetadata(channelId) {
+        if (!this.channelIdToDriver.has(channelId)) {
+            throw errors.noRunningGameInstance(channelId);
+        }
+
+        return this.channelIdToDriver.get(channelId).metadata;
     }
 
     removeDriver(channelId) {

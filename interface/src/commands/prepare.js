@@ -13,6 +13,10 @@ function createPrepareMsgOptions(ownerId, playerMentions) {
                 .setCustomId(`leave_${ownerId}`)
                 .setLabel("Leave")
                 .setStyle("DANGER"),
+            new MessageButton()
+                .setCustomId(`start_${ownerId}`)
+                .setLabel("Start")
+                .setStyle("PRIMARY"),
         ),
     ];
 
