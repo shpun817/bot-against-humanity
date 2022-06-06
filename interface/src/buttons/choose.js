@@ -46,6 +46,11 @@ module.exports = {
 
         const ranking = driver.endRound(chosenPlayerMention);
 
+        for (const result of submitResult) {
+            const message = result[2];
+            await message.edit({ components: [] });
+        }
+
         await interaction.reply(`${chosenPlayerMention}, you are chosen!!`);
 
         const topScore = ranking[0][1];
@@ -74,6 +79,8 @@ module.exports = {
             const roundEndContent = `🎂🎉 ${topPlayers[0]} has won a ticket to hell!!! 🍾🎊`;
 
             await channel.send(roundEndContent);
+
+            interaction.client.gameInstanceManager.removeDriver(channelId);
             return;
         } else {
             let roundEndContent = `🔥 ${topPlayers[0]} is leading!! 🔥`;
