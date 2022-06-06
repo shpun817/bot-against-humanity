@@ -32,7 +32,7 @@ where
     ordered_players: Vec<PN>,
 
     // Variables
-    current_judge: usize,
+    current_judge: Option<usize>,
     current_question: Option<QuestionCard>,
     submitted_answers_display: HashMap<PN, String>,
 }
@@ -47,8 +47,13 @@ where
 
     /// Change the Judge to the next player and return the player's name
     pub fn next_judge(&mut self) -> PN {
-        self.current_judge = (self.current_judge + 1) % self.num_players;
-        self.current_judge_name()
+        self.current_judge = if let Some(current_judge) = self.current_judge {
+            Some((current_judge + 1) % self.num_players)
+        } else {
+            Some(0)
+        };
+
+        self.current_judge_name().unwrap()
     }
 
     pub fn draw_next_question_card(&mut self) -> String {
@@ -91,9 +96,15 @@ where
             return Err(GameCoreError::NoActiveQuestionCard);
         };
 
-        if *player_name == self.current_judge_name() {
+        let judge = if let Some(judge) = self.current_judge_name() {
+            judge
+        } else {
+            return Err(GameCoreError::NoActiveJudge);
+        };
+
+        if *player_name == judge {
             return Err(GameCoreError::JudgeTryingToSubmitAnswers {
-                judge_name: self.current_judge_name().to_string(),
+                judge_name: judge.to_string(),
             });
         }
 
@@ -138,7 +149,13 @@ where
     }
 
     pub fn increment_awesome_points(&mut self, player_name: &PN) -> Result<i32, GameCoreError> {
-        if *player_name == self.current_judge_name() {
+        let judge = if let Some(judge) = self.current_judge_name() {
+            judge
+        } else {
+            return Err(GameCoreError::NoActiveJudge);
+        };
+
+        if *player_name == judge {
             return Err(GameCoreError::JudgeCannotBeChosen);
         }
 
@@ -188,14 +205,15 @@ where
             max_hand_size,
             ordered_players,
 
-            current_judge: 0,
+            current_judge: None,
             current_question: None,
             submitted_answers_display: HashMap::new(),
         }
     }
 
-    fn current_judge_name(&self) -> PN {
-        self.ordered_players[self.current_judge].clone()
+    fn current_judge_name(&self) -> Option<PN> {
+        self.current_judge
+            .map(|current_judge| self.ordered_players[current_judge].clone())
     }
 
     fn refill_player_hands(&mut self) {
@@ -228,15 +246,12 @@ mod tests {
     }
 
     #[test]
-    fn has_a_judge() {
+    fn has_no_judge_at_start() {
         let game_state = get_built_game_state();
 
         let current_judge_name = game_state.current_judge_name();
 
-        dbg!(&current_judge_name);
-        assert!(
-            current_judge_name == "A" || current_judge_name == "B" || current_judge_name == "C"
-        );
+        assert!(current_judge_name.is_none());
     }
 
     #[test]
@@ -293,8 +308,9 @@ mod tests {
     #[test]
     fn submit_answers_unfinished() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
         game_state.draw_next_question_card();
-        let current_judge_name = game_state.current_judge_name();
+        let current_judge_name = game_state.current_judge_name().unwrap();
         let answer_submitter = if current_judge_name != "A" { "A" } else { "B" };
 
         assert_eq!(
@@ -306,8 +322,9 @@ mod tests {
     #[test]
     fn submit_answers_finished() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
         game_state.draw_next_question_card();
-        let current_judge_name = game_state.current_judge_name();
+        let current_judge_name = game_state.current_judge_name().unwrap();
         let answer_submitters = ["A", "B", "C"]
             .iter()
             .filter_map(|&name| {
@@ -331,7 +348,8 @@ mod tests {
     #[test]
     fn submit_answers_before_question_is_drawn() {
         let mut game_state = get_built_game_state();
-        let current_judge_name = game_state.current_judge_name();
+        game_state.next_judge();
+        let current_judge_name = game_state.current_judge_name().unwrap();
         let answer_submitter = if current_judge_name != "A" { "A" } else { "B" };
 
         assert_eq!(
@@ -343,6 +361,7 @@ mod tests {
     #[test]
     fn submit_answers_unknown_player() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
         game_state.draw_next_question_card();
         let answer_submitter = "X";
 
@@ -357,12 +376,13 @@ mod tests {
     #[test]
     fn submit_answers_but_is_judge() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
         game_state.draw_next_question_card();
 
         assert_eq!(
-            game_state.submit_answers(&game_state.current_judge_name(), &[7]),
+            game_state.submit_answers(&game_state.current_judge_name().unwrap(), &[7]),
             Err(GameCoreError::JudgeTryingToSubmitAnswers {
-                judge_name: game_state.current_judge_name(),
+                judge_name: game_state.current_judge_name().unwrap(),
             })
         );
     }
@@ -370,8 +390,9 @@ mod tests {
     #[test]
     fn submit_answers_but_already_submitted_before_finish() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
         game_state.draw_next_question_card();
-        let current_judge_name = game_state.current_judge_name();
+        let current_judge_name = game_state.current_judge_name().unwrap();
         let answer_submitter = if current_judge_name != "A" { "A" } else { "B" };
         game_state
             .submit_answers(&answer_submitter.to_owned(), &[7])
@@ -389,8 +410,9 @@ mod tests {
     #[test]
     fn submit_answers_but_already_submitted_after_finish() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
         game_state.draw_next_question_card();
-        let current_judge_name = game_state.current_judge_name();
+        let current_judge_name = game_state.current_judge_name().unwrap();
         let answer_submitters = ["A", "B", "C"]
             .iter()
             .filter_map(|&name| {
@@ -434,8 +456,9 @@ mod tests {
     #[test]
     fn refill_player_hands() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
         game_state.draw_next_question_card();
-        let current_judge_name = game_state.current_judge_name();
+        let current_judge_name = game_state.current_judge_name().unwrap();
         let answer_submitter = if current_judge_name != "A" { "A" } else { "B" };
         game_state
             .submit_answers(&answer_submitter.to_owned(), &[7])
@@ -448,7 +471,8 @@ mod tests {
     #[test]
     fn increment_awesome_points() {
         let mut game_state = get_built_game_state();
-        let judge = game_state.current_judge_name();
+        game_state.next_judge();
+        let judge = game_state.current_judge_name().unwrap();
         let non_judge = if judge == "A" {
             "B"
         } else {
@@ -476,6 +500,7 @@ mod tests {
     #[test]
     fn increment_awesome_points_unknown_player() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
 
         assert_eq!(
             game_state.increment_awesome_points(&"D".to_owned()),
@@ -488,9 +513,10 @@ mod tests {
     #[test]
     fn increment_awesome_points_judge() {
         let mut game_state = get_built_game_state();
+        game_state.next_judge();
 
         assert_eq!(
-            game_state.increment_awesome_points(&game_state.current_judge_name()),
+            game_state.increment_awesome_points(&game_state.current_judge_name().unwrap()),
             Err(GameCoreError::JudgeCannotBeChosen)
         )
     }
@@ -498,7 +524,8 @@ mod tests {
     #[test]
     fn report_awesome_point_ranking() {
         let mut game_state = get_built_game_state();
-        let judge = game_state.current_judge_name();
+        game_state.next_judge();
+        let judge = game_state.current_judge_name().unwrap();
         let non_judge = if judge == "A" { "B" } else { "A" };
         game_state
             .increment_awesome_points(&non_judge.to_owned())

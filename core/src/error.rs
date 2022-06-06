@@ -29,6 +29,7 @@ pub enum GameCoreError {
     },
     NoQuestionCards,
     NoActiveQuestionCard,
+    NoActiveJudge,
     NotEnoughPlayers {
         num_players: usize,
     },
@@ -92,6 +93,7 @@ impl Display for GameCoreError {
             }
             NoQuestionCards => "There are no question cards.".to_owned(),
             NoActiveQuestionCard => "There is no active question card.".to_owned(),
+            NoActiveJudge => "There is no active judge.".to_owned(),
             PlayerDoesNotExist { name } => {
                 format!("Player with name {} does not exist.", name)
             }
