@@ -1,5 +1,5 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
-const { formatHand } = require("../util");
+const { formatHand } = require("./hand");
 
 module.exports = {
     name: "answer",

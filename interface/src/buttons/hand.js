@@ -1,4 +1,32 @@
-const { formatHand } = require("../util");
+const { MessageActionRow, MessageButton } = require("discord.js");
+
+// `hand`: an array of strings
+function formatHand(currentSelectionIndices, hand) {
+    const cardButtons = hand.map((card, i) =>
+        new MessageButton()
+            .setCustomId(`answer_${i}`)
+            .setLabel(card)
+            .setStyle(
+                currentSelectionIndices.includes(i) ? "SUCCESS" : "PRIMARY",
+            ),
+    );
+
+    const components = [];
+    // Discord.js guide -> Buttons
+    // You can have a maximum of five ActionRows per message, and five buttons within an ActionRow.
+    for (let i = 0; i < cardButtons.length && i < 25; ++i) {
+        if (i % 5 === 0) {
+            components.push(new MessageActionRow());
+        }
+        components[components.length - 1].addComponents(cardButtons[i]);
+    }
+
+    return {
+        content: "*Ignore any errors you see in this menu.*",
+        components,
+        ephemeral: true,
+    };
+}
 
 module.exports = {
     name: "hand",
@@ -30,4 +58,5 @@ module.exports = {
 
         await interaction.reply(formatHand([], hand));
     },
+    formatHand,
 };
