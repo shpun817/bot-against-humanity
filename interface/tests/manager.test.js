@@ -39,6 +39,14 @@ describe("GameInstanceManager", () => {
         expect(builder1).toBe(builder2); // Same object
     });
 
+    test("can remove a builder", () => {
+        gameInstanceManager.createBuilder("A");
+
+        expect(() => gameInstanceManager.removeBuilder("A")).not.toThrow();
+        expect(() => gameInstanceManager.getBuilder("A")).toThrow();
+    });
+    
+
     test("can create a different builder for different owners.", () => {
         const builderA = gameInstanceManager.createBuilder("A");
         const builderB = gameInstanceManager.createBuilder("B");

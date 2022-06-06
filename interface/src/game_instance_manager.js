@@ -67,6 +67,14 @@ class GameInstanceManager {
         return this.ownerIdToBuilder.get(ownerId).metadata;
     }
 
+    removeBuilder(ownerId) {
+        if (!this.ownerIdToBuilder.has(ownerId)) {
+            throw errors.noGameInstanceBeingBuilt();
+        }
+
+        this.ownerIdToBuilder.delete(ownerId);
+    }
+
     buildDriver(ownerId, channelId) {
         if (!this.ownerIdToBuilder.has(ownerId)) {
             throw errors.noGameInstanceBeingBuilt();
