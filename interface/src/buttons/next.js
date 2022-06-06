@@ -28,7 +28,7 @@ module.exports = {
         const submitResult = metadata.submitResult;
 
         if (submissionIndex === submitResult.length - 1) {
-            await interaction.reply(
+            await interaction.channel.send(
                 `That's all! Now **choose** your favourite, **Judge** ${userMention}!`,
             );
             // The end is reached. Set all previous messages accordingly.
