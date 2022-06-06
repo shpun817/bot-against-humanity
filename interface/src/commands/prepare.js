@@ -31,6 +31,10 @@ module.exports = {
         .setName("prepare")
         .setDescription("Prepare a new game!"),
     async execute(interaction) {
+        if (interaction.channel.isThread()) {
+            throw "Cannot create a game inside a thread.";
+        }
+
         const owner = interaction.user;
         const ownerId = owner.id;
         const ownerMention = owner.toString();
