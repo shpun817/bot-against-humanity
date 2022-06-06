@@ -32,24 +32,18 @@ const errors = {
         ),
 };
 
+class BuilderAgent {
+    constructor() {
+        this.builder = new WasmDriverBuilder();
+        this.metadata = {};
+    }
+}
+
 class GameInstanceManager {
     constructor() {
         this.ownerIdToBuilder = new Map();
         this.channelIdToDriver = new Map();
         this.channelIdToSubmittedAnswers = new Map();
-        this.userIdToUsername = new Map();
-    }
-
-    registerUsername(userId, displayName) {
-        this.userIdToUsername.set(userId, displayName);
-    }
-
-    getUsername(userId) {
-        if (!this.userIdToUsername.has(userId)) {
-            throw errors.noRegisteredUsername(userId);
-        }
-
-        return this.userIdToUsername.get(userId);
     }
 
     createBuilder(ownerId) {
@@ -57,8 +51,8 @@ class GameInstanceManager {
             throw errors.gameInstanceAlreadyBeingBuilt();
         }
 
-        this.ownerIdToBuilder.set(ownerId, new WasmDriverBuilder());
-        return this.ownerIdToBuilder.get(ownerId);
+        this.ownerIdToBuilder.set(ownerId, new BuilderAgent());
+        return this.ownerIdToBuilder.get(ownerId).builder;
     }
 
     getBuilder(ownerId) {
@@ -66,7 +60,15 @@ class GameInstanceManager {
             throw errors.noGameInstanceBeingBuilt();
         }
 
-        return this.ownerIdToBuilder.get(ownerId);
+        return this.ownerIdToBuilder.get(ownerId).builder;
+    }
+
+    getBuilderMetadata(ownerId) {
+        if (!this.ownerIdToBuilder.has(ownerId)) {
+            throw errors.noGameInstanceBeingBuilt();
+        }
+
+        return this.ownerIdToBuilder.get(ownerId).metadata;
     }
 
     buildDriver(ownerId, channelId) {

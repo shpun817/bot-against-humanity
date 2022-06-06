@@ -14,16 +14,6 @@ describe("GameInstanceManager", () => {
         gameInstanceManager = new GameInstanceManager();
     });
 
-    test("can register a user display name.", () => {
-        gameInstanceManager.registerUsername("A", "Player A");
-    });
-
-    test("can get a registered user display name.", () => {
-        gameInstanceManager.registerUsername("A", "Player A");
-
-        expect(gameInstanceManager.getUsername("A")).toBe("Player A");
-    });
-
     test("can create a builder if not exists.", () => {
         const builder = gameInstanceManager.createBuilder("A");
 

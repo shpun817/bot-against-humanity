@@ -9,13 +9,12 @@ module.exports = {
     async execute(interaction) {
         const owner = interaction.user;
         const ownerId = owner.id;
-        const ownerName = owner.username;
         const ownerMention = owner.toString();
 
         const gameInstanceManager = interaction.client.gameInstanceManager;
-        gameInstanceManager.registerUsername(ownerId, ownerName);
 
         const builder = gameInstanceManager.createBuilder(ownerId);
+        const metadata = gameInstanceManager.getBuilderMetadata(ownerId);
         builder.addPlayer(ownerMention);
         builder.addNewQuestions(AssetLoader.LoadQuestionsJson("default"));
         builder.addNewAnswers(AssetLoader.LoadAnswersJson("default"));
@@ -33,8 +32,9 @@ module.exports = {
             ),
         ];
 
-        await interaction.reply({
-            content: `${ownerMention} has started a game of Bot Against Humanity!`,
+        metadata.players = [ownerMention];
+        metadata.prepareMsg = await interaction.reply({
+            content: `Players: ${metadata.players}`,
             components,
         });
     },
