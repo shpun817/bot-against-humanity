@@ -19,13 +19,13 @@ function formatQuestion(judge, question) {
 
     content += `Show ${judge} what you got:\n\n`;
 
-    content += `${question.replaceAll("_", "\\_")}\n\n`;
+    content += `**${question.replaceAll("_", "\\_")}**`;
 
     const components = [
         new MessageActionRow().addComponents(
             new MessageButton()
                 .setCustomId("hand")
-                .setLabel("View my Hand")
+                .setLabel("View Hand")
                 .setStyle("PRIMARY"),
         ),
     ];
