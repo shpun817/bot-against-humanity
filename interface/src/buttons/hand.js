@@ -22,6 +22,7 @@ module.exports = {
 
         const hand = metadata.playerHands[userMention];
         metadata.playerSelections[userMention] = [];
+        metadata.playerHandInteractions[userMention] = interaction;
 
         await interaction.reply(formatHand([], hand));
     },

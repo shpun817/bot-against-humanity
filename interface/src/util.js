@@ -43,15 +43,17 @@ async function startRound(driver, channel, metadata) {
 
     metadata.playerHands = playerHands;
     metadata.playerSelections = {};
+    metadata.playerHandInteractions = {};
+    metadata.playerAnswerInteractions = {};
 }
 
 // `hand`: an array of strings
-function formatHand(currentSelection, hand) {
+function formatHand(currentSelectionIndices, hand) {
     const cardButtons = hand.map((card, i) =>
         new MessageButton()
             .setCustomId(`answer_${i}`)
             .setLabel(card)
-            .setStyle("PRIMARY"),
+            .setStyle(currentSelectionIndices.includes(i) ? "SUCCESS" : "PRIMARY"),
     );
 
     const components = [];
@@ -65,7 +67,7 @@ function formatHand(currentSelection, hand) {
     }
 
     return {
-        content: `You selected: ${currentSelection}`,
+        content: "*Ignore any errors you see in this menu.*",
         components,
         ephemeral: true,
     };
