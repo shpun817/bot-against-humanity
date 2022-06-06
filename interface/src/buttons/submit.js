@@ -71,10 +71,16 @@ module.exports = {
 
         // The hand and answer interactions must have been assigned before the submit window showed up.
         const handInteraction = metadata.playerHandInteractions[userMention];
+        const handInteractionReply = await handInteraction.fetchReply();
+        const components = handInteractionReply.components.map((row) => {
+            row.components = row.components.map((button) => button.setDisabled(true));
+            return row;
+        });
         await handInteraction.editReply({
             content: "Thanks for submitting your answers!",
-            components: [],
+            components,
         });
+
         const answerInteraction =
             metadata.playerAnswerInteractions[userMention];
         await answerInteraction.editReply({
@@ -89,6 +95,7 @@ module.exports = {
         metadata.successfullySubmittedPlayers.add(userMention);
 
         if (submitResult !== null) {
+            // Remove `View Hand` button
             await metadata.roundStartMessage.edit({ components: [] });
 
             await interaction.channel.send(
