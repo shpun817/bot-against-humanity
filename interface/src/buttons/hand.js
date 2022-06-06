@@ -12,6 +12,10 @@ module.exports = {
         const metadata =
             interaction.client.gameInstanceManager.getDriverMetadata(channelId);
 
+        if (userMention === metadata.judge) {
+            throw "You are the Judge! Sit back and relax!";
+        }
+
         if (!(userMention in metadata.playerHands)) {
             await interaction.reply({
                 content: "You are not part of this game!",

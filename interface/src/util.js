@@ -38,6 +38,7 @@ async function startRound(driver, channel, metadata) {
 
     await channel.send(formatQuestion(judge, question));
 
+    metadata.judge = judge;
     metadata.playerHands = playerHands;
     metadata.playerSelections = {};
     metadata.playerHandInteractions = {};
