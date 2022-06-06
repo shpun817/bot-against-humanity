@@ -2,6 +2,26 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageActionRow, MessageButton } = require("discord.js");
 const AssetLoader = require("../asset_loader");
 
+function createPrepareMsgOptions(ownerId, players) {
+    const components = [
+        new MessageActionRow().addComponents(
+            new MessageButton()
+                .setCustomId(`join_${ownerId}`)
+                .setLabel("Join")
+                .setStyle("SUCCESS"),
+            new MessageButton()
+                .setCustomId(`leave_${ownerId}`)
+                .setLabel("Leave")
+                .setStyle("DANGER"),
+        ),
+    ];
+
+    return {
+        content: `Players: ${players}`,
+        components,
+    };
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("prepare")
@@ -19,23 +39,10 @@ module.exports = {
         builder.addNewQuestions(AssetLoader.LoadQuestionsJson("default"));
         builder.addNewAnswers(AssetLoader.LoadAnswersJson("default"));
 
-        const components = [
-            new MessageActionRow().addComponents(
-                new MessageButton()
-                    .setCustomId(`join_${ownerId}`)
-                    .setLabel("Join")
-                    .setStyle("SUCCESS"),
-                new MessageButton()
-                    .setCustomId(`leave_${ownerId}`)
-                    .setLabel("Leave")
-                    .setStyle("DANGER"),
-            ),
-        ];
-
         metadata.players = [ownerMention];
-        metadata.prepareMsg = await interaction.reply({
-            content: `Players: ${metadata.players}`,
-            components,
-        });
+        metadata.prepareMsg = await interaction.reply(
+            createPrepareMsgOptions(ownerId, metadata.players),
+        );
     },
+    createPrepareMsgOptions,
 };
