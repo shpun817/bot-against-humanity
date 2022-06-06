@@ -87,7 +87,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     try {
-        buttons.get(buttonName).handle(interaction);
+        await buttons.get(buttonName).handle(interaction);
     } catch (error) {
         if (error instanceof LogDisplayError) {
             console.error(error);

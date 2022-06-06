@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageActionRow, MessageButton } = require("discord.js");
 const AssetLoader = require("../asset_loader");
 
-function createPrepareMsgOptions(ownerId, players) {
+function createPrepareMsgOptions(ownerId, playerMentions) {
     const components = [
         new MessageActionRow().addComponents(
             new MessageButton()
@@ -17,7 +17,7 @@ function createPrepareMsgOptions(ownerId, players) {
     ];
 
     return {
-        content: `Players: ${players}`,
+        content: `Players: ${playerMentions}`,
         components,
     };
 }
@@ -39,9 +39,9 @@ module.exports = {
         builder.addNewQuestions(AssetLoader.LoadQuestionsJson("default"));
         builder.addNewAnswers(AssetLoader.LoadAnswersJson("default"));
 
-        metadata.players = [ownerMention];
+        metadata.playerMentions = [ownerMention];
         metadata.prepareMsg = await interaction.reply(
-            createPrepareMsgOptions(ownerId, metadata.players),
+            createPrepareMsgOptions(ownerId, metadata.playerMentions),
         );
     },
     createPrepareMsgOptions,
