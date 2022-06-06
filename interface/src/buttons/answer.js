@@ -42,7 +42,7 @@ module.exports = {
         const currentSelectionWords = currentSelectionIndices
             .map((i) => hand[i])
             .reduce((acc, answer, i, arr) => {
-                acc += answer;
+                acc += `**${answer}**`;
                 if (i !== arr.length - 1) {
                     acc += ", ";
                 }
@@ -61,6 +61,7 @@ module.exports = {
             ],
             ephemeral: true,
         };
+
         try {
             await answerInteraction.reply(option);
         } catch (_) {
