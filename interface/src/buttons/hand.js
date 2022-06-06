@@ -45,11 +45,11 @@ module.exports = {
         }
 
         if (!(userMention in metadata.playerHands)) {
-            await interaction.reply({
-                content: "You are not part of this game!",
-                ephemeral: true,
-            });
-            return;
+            throw "You are not part of this game!";
+        }
+
+        if (metadata.successfullySubmittedPlayers.has(userMention)) {
+            throw "You have already submitted an answer!";
         }
 
         const hand = metadata.playerHands[userMention];

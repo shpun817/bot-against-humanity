@@ -84,7 +84,9 @@ module.exports = {
         const option = {
             content: `${userMention} is ready!`,
         };
-        await interaction.reply(option);
+        await interaction.channel.send(option);
+
+        metadata.successfullySubmittedPlayers.add(userMention);
 
         if (submitResult !== null) {
             await metadata.roundStartMessage.edit({ components: [] });

@@ -47,6 +47,7 @@ async function startRound(driver, channel, metadata) {
     metadata.playerHandInteractions = {};
     metadata.playerAnswerInteractions = {};
     metadata.playerSubmitInteractions = {};
+    metadata.successfullySubmittedPlayers = new Set();
     metadata.submitResult = [];
 }
 
