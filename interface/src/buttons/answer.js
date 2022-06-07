@@ -55,7 +55,7 @@ module.exports = {
             }, "");
 
         const option = {
-            content: `**Check the order!**You selected ${currentSelectionWords}`,
+            content: `**Check the order!**\nYou selected ${currentSelectionWords}`,
             components: [
                 new MessageActionRow().addComponents(
                     new MessageButton()

@@ -90,14 +90,13 @@ impl QuestionCard {
             .tokens
             .iter()
             .map(|token| {
-                let token_str = if let Some(token_str) = token {
-                    token_str
+                if let Some(token_str) = token {
+                    token_str.clone()
                 } else {
                     let answer_str = &answers[current_answer];
                     current_answer += 1;
-                    answer_str
-                };
-                token_str.to_owned()
+                    "**".to_owned() + answer_str + "**"
+                }
             })
             .collect::<String>())
     }
@@ -215,7 +214,7 @@ mod tests {
         let answer_cards = vec!["Your Father"];
 
         let combine_result = question_card.combine_with_answers(answer_cards);
-        assert_eq!(combine_result.ok().unwrap(), "Who am I? Your Father");
+        assert_eq!(combine_result.ok().unwrap(), "Who am I? **Your Father**");
     }
 
     #[test]
@@ -224,7 +223,7 @@ mod tests {
         let answer_cards = vec!["Your Father"];
 
         let combine_result = question_card.combine_with_answers(answer_cards);
-        assert_eq!(combine_result.ok().unwrap(), "I am Your Father.");
+        assert_eq!(combine_result.ok().unwrap(), "I am **Your Father**.");
     }
 
     #[test]
@@ -235,7 +234,7 @@ mod tests {
         let combine_result = question_card.combine_with_answers(answer_cards);
         assert_eq!(
             combine_result.ok().unwrap(),
-            "I am Your Father, and you are Luke Skywalker."
+            "I am **Your Father**, and you are **Luke Skywalker**."
         );
     }
 
