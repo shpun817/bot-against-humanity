@@ -9,6 +9,10 @@ const { LogDisplayError } = require("./error");
 async function handleError(error, interaction) {
     const options = { content: "Error", ephemeral: true };
 
+    console.error(
+        `\n${interaction.user.username} triggered an error at ${interaction.channel.name}:`,
+    );
+
     if (error instanceof LogDisplayError) {
         console.error(error);
         options.content = error.displayMsg;
@@ -22,6 +26,8 @@ async function handleError(error, interaction) {
         console.error(error);
         options.content = "Unknown error!";
     }
+
+    console.error("\n");
 
     try {
         await interaction.reply(options);
