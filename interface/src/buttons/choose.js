@@ -46,9 +46,8 @@ module.exports = {
 
         const ranking = driver.endRound(chosenPlayerMention);
 
-        for (const result of submitResult) {
-            const message = result[2];
-            await message.edit({ components: [] });
+        for (const [playerMention, answer, message] of submitResult) {
+            await message.edit({ content: `${playerMention}: ${answer}`, components: [] });
         }
 
         await interaction.reply(`${chosenPlayerMention}, you are chosen!!`);
