@@ -73,7 +73,9 @@ module.exports = {
         const handInteraction = metadata.playerHandInteractions[userMention];
         const handInteractionReply = await handInteraction.fetchReply();
         const components = handInteractionReply.components.map((row) => {
-            row.components = row.components.map((button) => button.setDisabled(true));
+            row.components = row.components.map((button) =>
+                button.setDisabled(true),
+            );
             return row;
         });
         await handInteraction.editReply({
@@ -99,7 +101,8 @@ module.exports = {
             await metadata.roundStartMessage.edit({ components: [] });
 
             await interaction.channel.send(
-                "All players have submitted their answers!",
+                "All players have submitted their answers!\n" +
+                    "===================================",
             );
 
             metadata.submitResult = submitResult;

@@ -54,7 +54,10 @@ module.exports = {
             await message.edit({ content, components: [] });
         }
 
-        await interaction.reply(`${chosenPlayerMention}, you are chosen!!`);
+        await interaction.reply(
+            `${chosenPlayerMention}, you are chosen!!\n` +
+                "===================================",
+        );
 
         const topScore = ranking[0][1];
 

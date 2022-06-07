@@ -51,7 +51,8 @@ module.exports = {
 
         if (submissionIndex === submitResult.length - 2) {
             await interaction.channel.send(
-                `That's all! Now **choose** your favourite, **Judge** ${userMention}!`,
+                "===================================\n" +
+                    `That's all! Now **choose** your favourite, **Judge** ${userMention}!`,
             );
             // The end is reached. Set all previous messages accordingly.
             for (let i = 0; i < submitResult.length; ++i) {
