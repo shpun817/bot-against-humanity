@@ -22,7 +22,7 @@ function formatHand(currentSelectionIndices, hand) {
     }
 
     return {
-        content: "*Ignore any errors you see in this menu.*",
+        content: "*Ignore any errors you see in this menu.*\nSelect **3**.",
         components,
         ephemeral: true,
     };

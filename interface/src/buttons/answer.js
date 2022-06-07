@@ -56,7 +56,8 @@ module.exports = {
                     new MessageButton()
                         .setCustomId("submit")
                         .setLabel("Submit")
-                        .setStyle("SUCCESS"),
+                        .setStyle("SUCCESS")
+                        .setDisabled(currentSelectionIndices.length !== metadata.numBlanks),
                 ),
             ],
             ephemeral: true,
