@@ -47,7 +47,11 @@ module.exports = {
         const ranking = driver.endRound(chosenPlayerMention);
 
         for (const [playerMention, answer, message] of submitResult) {
-            await message.edit({ content: `${playerMention}: ${answer}`, components: [] });
+            let content = `${playerMention}: ${answer}`;
+            if (playerMention === chosenPlayerMention) {
+                content = "🔥 " + content + " 🔥";
+            }
+            await message.edit({ content, components: [] });
         }
 
         await interaction.reply(`${chosenPlayerMention}, you are chosen!!`);
@@ -69,7 +73,9 @@ module.exports = {
                 topPlayers.push(playerMention);
             }
 
-            rankingString += `${formatRank(rank)} ${playerMention} - **${score}**\n`;
+            rankingString += `${formatRank(
+                rank,
+            )} ${playerMention} - **${score}**\n`;
         }
 
         await channel.send(rankingString);
