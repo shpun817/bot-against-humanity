@@ -44,6 +44,11 @@ module.exports = {
         const submitResult = metadata.submitResult;
         const chosenPlayerMention = submitResult[submissionIndex][0];
 
+        await interaction.reply(
+            `${chosenPlayerMention}, you are chosen!!\n` +
+                "===================================",
+        );
+
         const ranking = driver.endRound(chosenPlayerMention);
 
         for (const [playerMention, answer, message] of submitResult) {
@@ -53,11 +58,6 @@ module.exports = {
             }
             await message.edit({ content, components: [] });
         }
-
-        await interaction.reply(
-            `${chosenPlayerMention}, you are chosen!!\n` +
-                "===================================",
-        );
 
         const topScore = ranking[0][1];
 
