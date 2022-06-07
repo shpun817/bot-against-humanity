@@ -27,7 +27,29 @@ module.exports = {
 
         const submitResult = metadata.submitResult;
 
-        if (submissionIndex === submitResult.length - 1) {
+        const currentDisplaySubmissionMessage =
+            submitResult[submissionIndex][2];
+        await currentDisplaySubmissionMessage.edit(
+            createDisplaySubmissionMessageOptions(
+                submitResult,
+                submissionIndex,
+                false,
+                false,
+            ),
+        );
+
+        const nextSubmissionIndex = submissionIndex + 1;
+        const displaySubmissionMessage = await interaction.channel.send(
+            createDisplaySubmissionMessageOptions(
+                metadata.submitResult,
+                nextSubmissionIndex,
+                submissionIndex < submitResult.length - 2,
+                false,
+            ),
+        );
+        submitResult[nextSubmissionIndex].push(displaySubmissionMessage);
+
+        if (submissionIndex === submitResult.length - 2) {
             await interaction.channel.send(
                 `That's all! Now **choose** your favourite, **Judge** ${userMention}!`,
             );
@@ -47,27 +69,5 @@ module.exports = {
 
             return;
         }
-
-        const currentDisplaySubmissionMessage =
-            submitResult[submissionIndex][2];
-        await currentDisplaySubmissionMessage.edit(
-            createDisplaySubmissionMessageOptions(
-                submitResult,
-                submissionIndex,
-                false,
-                false,
-            ),
-        );
-
-        const nextSubmissionIndex = submissionIndex + 1;
-        const displaySubmissionMessage = await interaction.channel.send(
-            createDisplaySubmissionMessageOptions(
-                metadata.submitResult,
-                nextSubmissionIndex,
-                true,
-                false,
-            ),
-        );
-        submitResult[nextSubmissionIndex].push(displaySubmissionMessage);
     },
 };
