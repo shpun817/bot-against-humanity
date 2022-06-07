@@ -1,7 +1,7 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
 
 // `hand`: an array of strings
-function formatHand(currentSelectionIndices, hand) {
+function formatHand(currentSelectionIndices, hand, numBlanks) {
     const cardButtons = hand.map((card, i) =>
         new MessageButton()
             .setCustomId(`answer_${i}`)
@@ -22,7 +22,7 @@ function formatHand(currentSelectionIndices, hand) {
     }
 
     return {
-        content: "*Ignore any errors you see in this menu.*\nSelect **3**.",
+        content: `*Ignore any errors you see in this menu.*\nSelect **${numBlanks}**.`,
         components,
         ephemeral: true,
     };
@@ -56,7 +56,7 @@ module.exports = {
         metadata.playerSelections[userMention] = [];
         metadata.playerHandInteractions[userMention] = interaction;
 
-        await interaction.reply(formatHand([], hand));
+        await interaction.reply(formatHand([], hand, metadata.numBlanks));
     },
     formatHand,
 };

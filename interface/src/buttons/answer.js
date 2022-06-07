@@ -28,15 +28,20 @@ module.exports = {
             metadata.playerAnswerInteractions[userMention];
 
         if (!currentSelectionIndices.includes(cardIndex)) {
-            currentSelectionIndices.push(cardIndex);
+            if (currentSelectionIndices.length < metadata.numBlanks) {
+                currentSelectionIndices.push(cardIndex);
+            } else if (metadata.numBlanks === 1) {
+                // There is only 1 blank and it is already filled.
+                currentSelectionIndices[0] = cardIndex;
+            }
         } else {
             const position = currentSelectionIndices.indexOf(cardIndex);
             currentSelectionIndices.splice(position, 1);
         }
 
-        // Refresh the selections
+        // Refresh the selections display
         await handInteraction.editReply(
-            formatHand(currentSelectionIndices, hand),
+            formatHand(currentSelectionIndices, hand, metadata.numBlanks),
         );
 
         const currentSelectionWords = currentSelectionIndices
@@ -50,14 +55,17 @@ module.exports = {
             }, "");
 
         const option = {
-            content: `You selected ${currentSelectionWords}`,
+            content: `**Check the order!**You selected ${currentSelectionWords}`,
             components: [
                 new MessageActionRow().addComponents(
                     new MessageButton()
                         .setCustomId("submit")
                         .setLabel("Submit")
                         .setStyle("SUCCESS")
-                        .setDisabled(currentSelectionIndices.length !== metadata.numBlanks),
+                        .setDisabled(
+                            currentSelectionIndices.length !==
+                                metadata.numBlanks,
+                        ),
                 ),
             ],
             ephemeral: true,
