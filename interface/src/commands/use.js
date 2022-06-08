@@ -25,7 +25,8 @@ module.exports = {
         await interaction.deferReply();
 
         const userId = interaction.user.id;
-        const builder = interaction.client.gameInstanceManager.getBuilder(userId);
+        const builder =
+            interaction.client.gameInstanceManager.getBuilder(userId);
 
         const libraryName = interaction.options.getString("library");
 
