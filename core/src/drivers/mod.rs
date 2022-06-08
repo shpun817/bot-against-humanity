@@ -19,6 +19,11 @@ pub trait GameCoreDriver {
         answer_indices: impl IntoIterator<Item = impl Into<usize>>,
     ) -> Result<AllSubmittedAnswers<Self::PlayerName>, Self::Error>;
 
+    fn redraw_hands(
+        &mut self,
+        player_names: impl IntoIterator<Item = impl Into<Self::PlayerName>>,
+    ) -> Result<(), Self::Error>;
+
     fn end_round(
         &mut self,
         chosen_player: impl Into<Self::PlayerName>,

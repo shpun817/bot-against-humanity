@@ -45,6 +45,32 @@ where
         self.ordered_players.clone()
     }
 
+    pub fn redraw_hands(&mut self, player_names: &[PN]) -> Result<(), GameCoreError> {
+        // If any player_name is unknown, abort the whole operation without any side effects.
+        for player_name in player_names {
+            if !self.players.contains_key(player_name) {
+                return Err(GameCoreError::PlayerDoesNotExist {
+                    name: player_name.to_string(),
+                });
+            }
+        }
+
+        for player_name in player_names {
+            let player = self.players.get_mut(player_name).unwrap();
+            let indices = (0..player.hand_size()).collect::<Vec<_>>();
+
+            let played_cards = player.remove_cards(&indices)?;
+
+            played_cards
+                .into_iter()
+                .for_each(|c| self.answer_card_storage.discard_card(c));
+        }
+
+        self.refill_player_hands();
+
+        Ok(())
+    }
+
     /// Change the Judge to the next player and return the player's name
     pub fn next_judge(&mut self) -> PN {
         self.current_judge = if let Some(current_judge) = self.current_judge {
@@ -303,6 +329,35 @@ mod tests {
         for hand in hands.values() {
             assert_eq!(hand.len(), game_state.max_hand_size);
         }
+    }
+
+    #[test]
+    fn redraw_hands() {
+        let mut game_state = get_built_game_state();
+        let hands1 = game_state.report_hands();
+        let redraw_players = ["A".to_owned(), "B".to_owned()];
+
+        game_state.redraw_hands(&redraw_players).unwrap();
+        let hands2 = game_state.report_hands();
+
+        assert_ne!(hands1.get("A"), hands2.get("A"));
+        assert_ne!(hands1.get("B"), hands2.get("B"));
+        assert_eq!(hands1.get("C"), hands2.get("C"));
+    }
+
+    #[test]
+    fn redraw_hands_unknown_player() {
+        let mut game_state = get_built_game_state();
+        let redraw_players = ["A".to_owned(), "D".to_owned()];
+
+        let result = game_state.redraw_hands(&redraw_players).err().unwrap();
+
+        assert_eq!(
+            result,
+            GameCoreError::PlayerDoesNotExist {
+                name: "D".to_owned()
+            }
+        );
     }
 
     #[test]

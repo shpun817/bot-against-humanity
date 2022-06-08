@@ -116,6 +116,18 @@ impl GameCoreDriver for GenericDriver {
             .submit_answers(&player_name.into(), &answer_indices)
     }
 
+    fn redraw_hands(
+        &mut self,
+        player_names: impl IntoIterator<Item = impl Into<Self::PlayerName>>,
+    ) -> Result<(), Self::Error> {
+        let player_names = player_names
+            .into_iter()
+            .map(|p| p.into())
+            .collect::<Vec<_>>();
+
+        self.game_state.redraw_hands(&player_names)
+    }
+
     /// Return Err() only when the game is not started or `chosen_player` is unknown.
     fn end_round(
         &mut self,
@@ -127,7 +139,7 @@ impl GameCoreDriver for GenericDriver {
         Ok(self.game_state.report_awesome_point_ranking())
     }
 
-    /// No side effects.
+    /// No-op.
     fn end_game(self) {}
 }
 
@@ -232,6 +244,8 @@ mod integration_tests {
                 println!("======================================================");
             }
 
+            let redraw_players = [non_judge_players[1].clone(), non_judge_players[0].clone()];
+
             // Simulating users' input of choosing answers
             let correct_num_blanks = Regex::new("_+")
                 .unwrap()
@@ -244,6 +258,9 @@ mod integration_tests {
                     .unwrap();
             }
             let submitted_answers = submitted_answers.unwrap();
+
+            // Redraw hands for some players
+            driver.redraw_hands(redraw_players).unwrap();
 
             // Display the submitted answers to everyone
             println!("The following creative answers were collected:");
