@@ -13,7 +13,7 @@ const errors = {
         ),
     noGameInstanceBeingBuilt: (ownerId) =>
         new LogDisplayError(
-            "The game instance is not being prepared, use `/prepare` to start preparing one!",
+            "No game instance is not being prepared, use `/prepare` to start preparing one!",
             `Owner with user id ${ownerId} does not have a game instance being prepared.`,
         ),
     threadAlreadyHasGameInstance: (channelId) =>
