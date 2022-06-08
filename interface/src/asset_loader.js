@@ -114,7 +114,9 @@ async function fetchColumnA(worksheetName) {
         );
     }
 
-    return response.data.values.flat().filter(filterFetchedValue);
+    const data = response.data.values.flat().filter(filterFetchedValue);
+
+    return Array.from(new Set(data));
 }
 
 function filterFetchedValue(value) {
