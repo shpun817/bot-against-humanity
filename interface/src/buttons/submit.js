@@ -105,6 +105,8 @@ module.exports = {
                     "===================================",
             );
 
+            await interaction.channel.send(`Your turn, ${metadata.judge}!`);
+
             metadata.submitResult = submitResult;
 
             const displaySubmissionMessage = await interaction.channel.send(
