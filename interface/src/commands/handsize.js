@@ -7,7 +7,7 @@ module.exports = {
         .addIntegerOption((option) =>
             option
                 .setName("value")
-                .setDescription("5-25, inclusive")
+                .setDescription("5-20, inclusive")
                 .setRequired(true),
         ),
     async execute(interaction) {
@@ -17,8 +17,8 @@ module.exports = {
 
         const handSize = interaction.options.getInteger("value");
 
-        if (handSize < 5 || handSize > 25) {
-            throw `Cannot set hand size to ${handSize}. It has to be between 5 and 25 inclusive.`;
+        if (handSize < 5 || handSize > 20) {
+            throw `Cannot set hand size to ${handSize}. It has to be between 5 and 20 inclusive.`;
         }
 
         builder.setHandSize(handSize);
