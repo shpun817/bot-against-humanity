@@ -22,12 +22,26 @@ class AssetLoader {
 
     static LoadQuestionsJson(libraryName) {
         const loadPath = AssetLoader.MakeQuestionsPath(libraryName);
-        return require(loadPath);
+        try {
+            return require(loadPath);
+        } catch (error) {
+            throw new LogDisplayError(
+                `Cannot load questions-${libraryName}.json`,
+                error.message,
+            );
+        }
     }
 
     static LoadAnswersJson(libraryName) {
         const loadPath = AssetLoader.MakeAnswersPath(libraryName);
-        return require(loadPath);
+        try {
+            return require(loadPath);
+        } catch (error) {
+            throw new LogDisplayError(
+                `Cannot load answers-${libraryName}.json`,
+                error.message,
+            );
+        }
     }
 
     static async FetchQuestions(libraryName) {
