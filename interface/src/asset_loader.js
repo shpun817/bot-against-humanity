@@ -45,7 +45,7 @@ class AssetLoader {
             );
         }
 
-        return `Successfully loaded ${questions.length} questions!`;
+        return `Successfully fetched ${questions.length} questions into storage!`;
     }
 
     static async FetchAnswers(libraryName) {
@@ -63,7 +63,7 @@ class AssetLoader {
             );
         }
 
-        return `Successfully loaded ${answers.length} answers!`;
+        return `Successfully fetched ${answers.length} answers into storage!`;
     }
 }
 

@@ -26,7 +26,7 @@ module.exports = {
         const userId = interaction.user.id;
         const builder = interaction.client.gameInstanceManager.getBuilder(userId);
 
-        const libraryName = interaction.options.getString("library") ?? "default";
+        const libraryName = interaction.options.getString("optional_library") ?? "default";
 
         let reply = "Adding";
         let data = [];

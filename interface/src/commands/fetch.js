@@ -23,7 +23,7 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply();
 
-        const libraryName = interaction.options.getString("library") ?? "default";
+        const libraryName = interaction.options.getString("optional_library") ?? "default";
 
         let reply = "Fetching";
         switch (interaction.options.getString("type")) {
