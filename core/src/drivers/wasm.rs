@@ -139,6 +139,17 @@ impl WasmDriver {
     }
 
     /// From JavaScript:
+    /// - Input: `player_names`: an array of strings
+    #[wasm_bindgen(js_name = redrawHands)]
+    pub fn redraw_hands(&mut self, player_names: JsValue) -> Result<(), GameCoreError> {
+        let player_names: Vec<String> = player_names
+            .into_serde()
+            .map_err(|_| "Supplied player names are not an array of strings.")?;
+
+        self.generic_driver.redraw_hands(player_names)
+    }
+
+    /// From JavaScript:
     /// - Input: `chosen_player`: string
     /// - Success: an array of tuples of a string and a number (player names and their awesome points, sorted in descending order of awesome points)
     /// - Failure: a string (error message)

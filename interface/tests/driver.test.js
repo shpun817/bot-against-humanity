@@ -94,6 +94,10 @@ describe("WasmDriver", () => {
             }
         }).not.toThrow();
 
+        expect(() =>
+            driver.redrawHands([nonJudgePlayers[1], nonJudgePlayers[0]]),
+        ).not.toThrow();
+
         expect(() => driver.endRound("You-Know-Who")).toThrow();
         expect(() => driver.endRound(judge)).toThrow();
         expect(() => driver.endRound(nonJudgePlayers[0])).not.toThrow();
