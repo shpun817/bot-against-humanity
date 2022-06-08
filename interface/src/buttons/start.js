@@ -48,6 +48,7 @@ async function startRound(driver, channel, metadata) {
     metadata.playerSelections = {};
     metadata.roundStartMessage = roundStartMessage;
     metadata.playerHandInteractions = {};
+    metadata.redrawPlayers = new Set();
     metadata.playerAnswerInteractions = {};
     metadata.playerSubmitInteractions = {};
     metadata.successfullySubmittedPlayers = new Set();

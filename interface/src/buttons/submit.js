@@ -97,6 +97,10 @@ module.exports = {
         metadata.successfullySubmittedPlayers.add(userMention);
 
         if (submitResult !== null) {
+            // Redraw for players who opted in
+            const redrawPlayers = Array.from(metadata.redrawPlayers);
+            driver.redrawHands(redrawPlayers);
+
             // Remove `View Hand` button
             await metadata.roundStartMessage.edit({ components: [] });
 
