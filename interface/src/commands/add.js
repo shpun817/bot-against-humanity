@@ -42,7 +42,7 @@ module.exports = {
                 reply = `Successfully added ${data.length} questions in ${libraryName}.`;
                 break;
             default:
-                throw "Unreachable: Unknown fetch `type`.";
+                throw "Unreachable: Unknown add `type`.";
         }
 
         await interaction.editReply(reply);
