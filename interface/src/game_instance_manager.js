@@ -44,8 +44,11 @@ class GameInstanceManager {
             throw errors.gameInstanceAlreadyBeingBuilt();
         }
 
+        const builder = new WasmDriverBuilder();
+        builder.setHandSize(15);
+
         this.ownerIdToBuilder.set(ownerId, {
-            builder: new WasmDriverBuilder(),
+            builder,
             metadata: { winTarget: 5 },
         });
         return this.ownerIdToBuilder.get(ownerId).builder;
