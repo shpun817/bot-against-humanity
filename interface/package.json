@@ -7,7 +7,7 @@
         "start": "node .",
         "test": "jest",
         "deploy-commands": "node src/deploy_commands.js",
-        "create-env": "node src/create_env.js"
+        "setup": "node src/setup.js"
     },
     "keywords": [],
     "author": "",
