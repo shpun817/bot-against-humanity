@@ -51,7 +51,7 @@ class AssetLoader {
 
         const writePath = AssetLoader.MakeQuestionsPath(libraryName);
         try {
-            await fs.writeFile(writePath, stringifiedQuestions);
+            await fs.writeFile(writePath, stringifiedQuestions, { flag: "w" });
         } catch (error) {
             throw new LogDisplayError(
                 `Error writing to ${writePath}`,
@@ -69,7 +69,7 @@ class AssetLoader {
 
         const writePath = AssetLoader.MakeAnswersPath(libraryName);
         try {
-            await fs.writeFile(writePath, stringifiedAnswers);
+            await fs.writeFile(writePath, stringifiedAnswers, { flag: "w" });
         } catch (error) {
             throw new LogDisplayError(
                 `Error writing to ${writePath}`,
