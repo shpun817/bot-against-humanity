@@ -15,7 +15,7 @@
     "dependencies": {
         "@discordjs/builders": "^0.13.0",
         "@discordjs/rest": "^0.4.1",
-        "bot-against-humanity-core": "file:../core/pkg",
+        "bot-against-humanity-core": "^0.1.0",
         "discord-api-types": "^0.33.2",
         "discord.js": "^13.7.0",
         "dotenv": "^16.0.1",
